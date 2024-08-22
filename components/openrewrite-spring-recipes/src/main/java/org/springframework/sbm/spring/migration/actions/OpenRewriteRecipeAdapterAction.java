@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,17 @@
  */
 package org.springframework.sbm.spring.migration.actions;
 
-import org.springframework.sbm.engine.recipe.AbstractAction;
-import org.springframework.sbm.engine.context.ProjectContext;
-import org.springframework.sbm.project.resource.RewriteSourceFileHolder;
-import org.springframework.sbm.project.resource.filter.GenericTypeListFilter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.extern.slf4j.Slf4j;
-import org.openrewrite.InMemoryExecutionContext;
-import org.openrewrite.Recipe;
-import org.openrewrite.Result;
-import org.openrewrite.SourceFile;
+import org.openrewrite.*;
 import org.openrewrite.properties.PropertiesParser;
 import org.openrewrite.xml.XmlParser;
 import org.openrewrite.yaml.YamlParser;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.sbm.engine.context.ProjectContext;
+import org.springframework.sbm.engine.recipe.AbstractAction;
+import org.springframework.sbm.project.resource.RewriteSourceFileHolder;
+import org.springframework.sbm.project.resource.filter.GenericTypeListFilter;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -39,6 +38,10 @@ import java.util.stream.Stream;
 public class OpenRewriteRecipeAdapterAction extends AbstractAction {
 	
     private final Recipe recipe;
+
+    @JsonIgnore
+    @Autowired
+    private ExecutionContext executionContext;
 
     public OpenRewriteRecipeAdapterAction(org.openrewrite.Recipe recipe) {
         this.recipe = recipe;
@@ -70,7 +73,7 @@ public class OpenRewriteRecipeAdapterAction extends AbstractAction {
                                         .filter(Objects::nonNull)
                                         .filter(it -> it.getFileName().toString().endsWith(".yml") || it.endsWith(".yaml"))
                                         .collect(Collectors.toList()),
-                                null, new InMemoryExecutionContext()
+                                null, executionContext
                         )
         );
 
@@ -82,7 +85,7 @@ public class OpenRewriteRecipeAdapterAction extends AbstractAction {
                                         .filter(it -> it.getFileName().toString().endsWith(".properties"))
                                         .collect(Collectors.toList()),
                                 null,
-                                new InMemoryExecutionContext()
+                                executionContext
                         )
         );
 
@@ -94,7 +97,7 @@ public class OpenRewriteRecipeAdapterAction extends AbstractAction {
                                         .filter(it -> it.getFileName().toString().endsWith(".xml"))
                                         .collect(Collectors.toList()),
                                 null,
-                                new InMemoryExecutionContext())
+                                executionContext)
         );
 
         List<Result> res = recipe.run(sourceFiles).getResults();

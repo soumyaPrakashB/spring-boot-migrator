@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,23 +23,25 @@ package org.springframework.sbm.shell;
  */
 public class ExceptionUtil {
 
-	public static Throwable getDeepestCause(Throwable e) {
-		Throwable cause = e;
-		Throwable parent = e.getCause();
-		while (parent != null && parent != e) {
-			cause = parent;
-			parent = cause.getCause();
-		}
-		return cause;
-	}
+    public static Throwable getDeepestCause(Throwable e) {
+        Throwable cause = e;
+        Throwable parent = e.getCause();
+        while (parent != null && parent != e) {
+            cause = parent;
+            parent = cause.getCause();
+        }
 
-	public static String getMessage(Throwable e) {
-		// The message of nested exception is usually more interesting than the
-		// one on top.
-		Throwable cause = getDeepestCause(e);
-		String errorType = cause.getClass().getSimpleName();
-		String msg = cause.getMessage();
-		return errorType + ": " + msg;
-	}
-	
+        return cause;
+    }
+
+    public static String getMessage(Throwable e) {
+        // The message of nested exception is usually more interesting than the
+        // one on top.
+        Throwable cause = getDeepestCause(e);
+        String errorType = cause.getClass().getSimpleName();
+        String msg = cause.getMessage();
+
+        return errorType + ": " + msg;
+    }
+
 }

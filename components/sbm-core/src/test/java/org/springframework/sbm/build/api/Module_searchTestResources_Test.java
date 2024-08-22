@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.sbm.build.api;
 
 import org.intellij.lang.annotations.Language;
@@ -26,6 +25,7 @@ import org.springframework.sbm.engine.context.ProjectContext;
 import org.springframework.sbm.project.resource.RewriteSourceFileHolder;
 import org.springframework.sbm.project.resource.TestProjectContext;
 import org.springframework.sbm.project.resource.filter.ProjectResourceFinder;
+import org.springframework.sbm.utils.LinuxWindowsPathUnifier;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -84,14 +84,14 @@ public class Module_searchTestResources_Test {
             ProjectContext context = TestProjectContext
                     .buildProjectContext()
                     .withMavenBuildFileSource("pom.xml", singlePom)
-                    .addProjectResource("src/test/resources/some-resource.txt", "the content")
+                    .withProjectResource("src/test/resources/some-resource.txt", "the content")
                     .build();
 
             AtomicBoolean wasCalled = new AtomicBoolean(false);
 
             context.getApplicationModules().list().get(0).searchTestResources(((ProjectResourceFinder<List<RewriteSourceFileHolder<? extends SourceFile>>>) projectResourceSet -> {
                 assertThat(projectResourceSet.list()).hasSize(1);
-                assertThat(projectResourceSet.get(0).getSourcePath().toString()).isEqualTo("src/test/resources/some-resource.txt");
+                assertThat(LinuxWindowsPathUnifier.unifyPath(projectResourceSet.get(0).getSourcePath())).isEqualTo("src/test/resources/some-resource.txt");
                 assertThat(projectResourceSet.get(0).print()).isEqualTo("the content");
                 wasCalled.set(true);
                 return null;
@@ -104,15 +104,15 @@ public class Module_searchTestResources_Test {
         @DisplayName("with resources in src/main/resources and src/test/resources provides ProjectResourceSet with resources from src/test/resources")
         void withResourcesInTestAndMain_providesResourcesFromTest() {
             ProjectContext context = builder
-                    .addProjectResource("src/main/resources/some-resource.txt", "the content")
-                    .addProjectResource("src/test/resources/some-resource.txt", "the test content")
+                    .withProjectResource("src/main/resources/some-resource.txt", "the content")
+                    .withProjectResource("src/test/resources/some-resource.txt", "the test content")
                     .build();
 
             AtomicBoolean wasCalled = new AtomicBoolean(false);
 
             context.getApplicationModules().list().get(0).searchTestResources(((ProjectResourceFinder<List<RewriteSourceFileHolder<? extends SourceFile>>>) projectResourceSet -> {
                 assertThat(projectResourceSet.list()).hasSize(1);
-                assertThat(projectResourceSet.get(0).getSourcePath().toString()).isEqualTo("src/test/resources/some-resource.txt");
+                assertThat(LinuxWindowsPathUnifier.unifyPath(projectResourceSet.get(0).getSourcePath())).isEqualTo("src/test/resources/some-resource.txt");
                 assertThat(projectResourceSet.get(0).print()).isEqualTo("the test content");
                 wasCalled.set(true);
                 return null;
@@ -126,7 +126,7 @@ public class Module_searchTestResources_Test {
         void withResourcesInSrcTestResources_providesEmptyProjectResources() {
 
             ProjectContext context = builder
-                    .addProjectResource("src/main/resources/some-resource.txt", "the content")
+                    .withProjectResource("src/main/resources/some-resource.txt", "the content")
                     .build();
 
             AtomicBoolean wasCalled = new AtomicBoolean(false);
@@ -239,7 +239,7 @@ public class Module_searchTestResources_Test {
         void withResourcesInOtherModules_providesEmptyProjectResources() {
 
             ProjectContext context = builder
-                    .addProjectResource("component/src/test/resources/some-resource.txt", "")
+                    .withProjectResource("component/src/test/resources/some-resource.txt", "")
                     .build();
 
             AtomicBoolean wasCalled = new AtomicBoolean(false);
@@ -259,15 +259,15 @@ public class Module_searchTestResources_Test {
         void withResourcesInMainAndTest_providesProjectResourcesFromSrcMainResources() {
 
             ProjectContext context = builder
-                    .addProjectResource("application/src/main/resources/some-resource.txt", "the content")
-                    .addProjectResource("application/src/test/resources/some-resource.txt", "the test content")
+                    .withProjectResource("application/src/main/resources/some-resource.txt", "the content")
+                    .withProjectResource("application/src/test/resources/some-resource.txt", "the test content")
                     .build();
 
             AtomicBoolean wasCalled = new AtomicBoolean(false);
 
             context.getApplicationModules().findModule("com.acme:application:0.0.1-SNAPSHOT").get().searchTestResources(((ProjectResourceFinder<List<RewriteSourceFileHolder<? extends SourceFile>>>) projectResourceSet -> {
                 assertThat(projectResourceSet.list()).hasSize(1);
-                assertThat(projectResourceSet.list().get(0).getSourcePath().toString()).isEqualTo("application/src/test/resources/some-resource.txt");
+                assertThat(LinuxWindowsPathUnifier.unifyPath(projectResourceSet.list().get(0).getSourcePath())).isEqualTo("application/src/test/resources/some-resource.txt");
                 assertThat(projectResourceSet.list().get(0).print()).isEqualTo("the test content");
                 wasCalled.set(true);
                 return null;
@@ -281,14 +281,14 @@ public class Module_searchTestResources_Test {
         void withResourcesInMain_providesProjectResourcesFromSrcMainResources() {
 
             ProjectContext context = builder
-                    .addProjectResource("application/src/test/resources/some-resource.txt", "the content")
+                    .withProjectResource("application/src/test/resources/some-resource.txt", "the content")
                     .build();
 
             AtomicBoolean wasCalled = new AtomicBoolean(false);
 
             context.getApplicationModules().findModule("com.acme:application:0.0.1-SNAPSHOT").get().searchTestResources(((ProjectResourceFinder<List<RewriteSourceFileHolder<? extends SourceFile>>>) projectResourceSet -> {
                 assertThat(projectResourceSet.list()).hasSize(1);
-                assertThat(projectResourceSet.list().get(0).getSourcePath().toString()).isEqualTo("application/src/test/resources/some-resource.txt");
+                assertThat(LinuxWindowsPathUnifier.unifyPath(projectResourceSet.list().get(0).getSourcePath())).isEqualTo("application/src/test/resources/some-resource.txt");
                 assertThat(projectResourceSet.list().get(0).print()).isEqualTo("the content");
                 wasCalled.set(true);
                 return null;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ class JeeWlsEjbJarProjectResourceRegistrarTest {
 
         JeeWlsEjbJarProjectResourceRegistrar sut = new JeeWlsEjbJarProjectResourceRegistrar();
         ProjectContext projectContext = TestProjectContext.buildProjectContext()
-                .addProjectResource(Path.of("src/main/resources/weblogic-ejb-jar.xml"), wlsEjbJarXml)
+                .withProjectResource(Path.of("src/main/resources/weblogic-ejb-jar.xml"), wlsEjbJarXml)
                 .addRegistrar(new JeeWlsEjbJarProjectResourceRegistrar())
                 .build();
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import org.springframework.sbm.engine.context.ProjectContext;
 import org.springframework.sbm.boot.properties.api.SpringBootApplicationProperties;
 import org.springframework.sbm.boot.properties.SpringBootApplicationPropertiesRegistrar;
 import org.springframework.sbm.boot.properties.search.SpringBootApplicationPropertiesResourceListFilter;
+import org.springframework.sbm.openrewrite.RewriteExecutionContext;
 import org.springframework.sbm.project.resource.TestProjectContext;
 import org.junit.jupiter.api.Test;
 
@@ -184,9 +185,9 @@ class Boot_24_25_SqlScriptDataSourceInitializationActionTest {
 
         ProjectContext projectContext = TestProjectContext.buildProjectContext()
                 .withProjectRoot(rootDirectory)
-                .addProjectResource(applicationPropertiesPath, applicationPropertiesLines1)
-                .addProjectResource(applicationPropertiesPathTest, applicationPropertiesLines2)
-                .addRegistrar(new SpringBootApplicationPropertiesRegistrar(new SpringApplicationPropertiesPathMatcher()))
+                .withProjectResource(applicationPropertiesPath, applicationPropertiesLines1)
+                .withProjectResource(applicationPropertiesPathTest, applicationPropertiesLines2)
+                .addRegistrar(new SpringBootApplicationPropertiesRegistrar(new SpringApplicationPropertiesPathMatcher(), new RewriteExecutionContext()))
                 .build();
 
         return projectContext;
@@ -198,8 +199,8 @@ class Boot_24_25_SqlScriptDataSourceInitializationActionTest {
 
         ProjectContext projectContext = TestProjectContext.buildProjectContext()
                 .withProjectRoot(rootDirectory)
-                .addProjectResource(applicationPropertiesPath, applicationPropertiesLines)
-                .addRegistrar(new SpringBootApplicationPropertiesRegistrar(new SpringApplicationPropertiesPathMatcher()))
+                .withProjectResource(applicationPropertiesPath, applicationPropertiesLines)
+                .addRegistrar(new SpringBootApplicationPropertiesRegistrar(new SpringApplicationPropertiesPathMatcher(), new RewriteExecutionContext()))
                 .build();
 
         return projectContext;
@@ -212,9 +213,9 @@ class Boot_24_25_SqlScriptDataSourceInitializationActionTest {
 
         ProjectContext projectContext = TestProjectContext.buildProjectContext()
                 .withProjectRoot(rootDirectory)
-                .addProjectResource(applicationPropertiesPath, applicationPropertiesLines)
-                .addProjectResource(applicationPropertiesPathTest, applicationPropertiesLines)
-                .addRegistrar(new SpringBootApplicationPropertiesRegistrar(new SpringApplicationPropertiesPathMatcher()))
+                .withProjectResource(applicationPropertiesPath, applicationPropertiesLines)
+                .withProjectResource(applicationPropertiesPathTest, applicationPropertiesLines)
+                .addRegistrar(new SpringBootApplicationPropertiesRegistrar(new SpringApplicationPropertiesPathMatcher(), new RewriteExecutionContext()))
                 .build();
 
         return projectContext;

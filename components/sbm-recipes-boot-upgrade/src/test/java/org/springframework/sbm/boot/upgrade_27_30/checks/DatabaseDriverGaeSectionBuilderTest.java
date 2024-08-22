@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.sbm.boot.upgrade_27_30.checks;
 
 import org.junit.jupiter.api.Test;
@@ -38,7 +37,7 @@ class DatabaseDriverGaeSectionBuilderTest {
 
         ProjectContext context = TestProjectContext.buildProjectContext()
                 .withBuildFileHavingDependencies("com.google.appengine:appengine-api-1.0-sdk:1.9.17")
-                .addJavaSource("src/main/java", javaClass)
+                .withJavaSource("src/main/java", javaClass)
                 .build();
 
         Sbu30_PreconditionCheckResult result = new DatabaseDriverGaeSectionBuilder(new DatabaseDriverGaeFinder()).run(context);

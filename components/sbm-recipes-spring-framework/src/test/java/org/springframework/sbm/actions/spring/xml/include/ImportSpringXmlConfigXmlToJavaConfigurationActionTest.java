@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,7 @@ public class ImportSpringXmlConfigXmlToJavaConfigurationActionTest {
         ProjectContext ctx = TestProjectContext.buildProjectContext()
             .withProjectRoot(projectRootDirectory)
             .withMavenRootBuildFileSource(buildFileSource)
-            .addProjectResource(Path.of("src/main/resources/my-xml/nicebeans.xml"), xmlSample)
+            .withProjectResource(Path.of("src/main/resources/my-xml/nicebeans.xml"), xmlSample)
             .build();
         
         ImportSpringXmlConfigAction action = new ImportSpringXmlConfigAction();
@@ -88,7 +88,7 @@ public class ImportSpringXmlConfigXmlToJavaConfigurationActionTest {
         Path absolutePathToConfig = projectRootDirectory.resolve("src/main/java/").resolve(pkgName.replace('.', '/')).resolve("SpringContextImportConfig.java");
         assertThat(r.getResource().getAbsolutePath()).isEqualTo(absolutePathToConfig);
         assertThat(r.getResource().print())
-        .isEqualTo(
+        .isEqualToNormalizingNewlines(
                 "package "+pkgName+";\n" + 
                 "\n" + 
                 "import org.springframework.context.annotation.Configuration;\n" + 
@@ -146,8 +146,8 @@ public class ImportSpringXmlConfigXmlToJavaConfigurationActionTest {
                 "\n" + 
                 "</project>"
             )
-            .addProjectResource(Path.of("src/main/resources/my-xml/nicebeans.xml"), xmlSample)
-            .addProjectResource(Path.of("src/main/resources/my-xml/favabeans.xml"), xmlSample2)
+            .withProjectResource(Path.of("src/main/resources/my-xml/nicebeans.xml"), xmlSample)
+            .withProjectResource(Path.of("src/main/resources/my-xml/favabeans.xml"), xmlSample2)
             .build();
         
         ImportSpringXmlConfigAction action = new ImportSpringXmlConfigAction();
@@ -159,7 +159,7 @@ public class ImportSpringXmlConfigXmlToJavaConfigurationActionTest {
         JavaSource r = resources.get(0);
         assertThat(r.getResource().getAbsolutePath()).isEqualTo(Path.of(".").toAbsolutePath().resolve("src/main/java/").resolve(pkgName.replace(".", "/")).resolve("SpringContextImportConfig.java").normalize());
         assertThat(r.getResource().print())
-        .isEqualTo(
+        .isEqualToNormalizingNewlines(
                 "package "+pkgName+";\n" + 
                 "\n" + 
                 "import org.springframework.context.annotation.Configuration;\n" + 

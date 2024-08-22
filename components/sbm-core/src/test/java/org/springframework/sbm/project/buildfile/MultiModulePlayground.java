@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,8 +64,8 @@ public class MultiModulePlayground {
 
         private final ProjectContext context = TestProjectContext.buildProjectContext()
                 .withMavenRootBuildFileSource(rootPom)
-                .addProjectResource("module1/pom.xml", childPom)
-                .addJavaSourceToModule("module1/src/main/java/Foo.java", javaCode)
+                .withProjectResource("module1/pom.xml", childPom)
+                .withJavaSourceInModule("module1/src/main/java/Foo.java", javaCode)
                 .build();
 
         @Test

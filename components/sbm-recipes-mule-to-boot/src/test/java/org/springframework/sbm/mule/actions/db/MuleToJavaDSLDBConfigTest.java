@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,28 +47,30 @@ public class MuleToJavaDSLDBConfigTest extends JavaDSLActionBaseTest {
     @Test
     public void fillApplicationPropertiesForDBConnection() {
         addXMLFileToResource(xml);
-        runAction();
-        assertThat(getApplicationPropertyContent()).isEqualTo("server.port=8080\n" +
-                "spring.datasource.url=--INSERT--DB-URL-HERE-Example:jdbc:oracle:thin:@localhost:1521:XE\n" +
-                "spring.datasource.username=--INSERT-USER-NAME--\n" +
-                "spring.datasource.password=--INSERT-PASSWORD--\n" +
-                "spring.datasource.driverClassName=oracle.jdbc.OracleDriver\n" +
-                "spring.jpa.show-sql=true"
-        );
+        runAction(projectContext -> {
+            assertThat(getApplicationPropertyContent()).isEqualTo("""
+                                                                  server.port=8080
+                                                                  spring.datasource.url=--INSERT--DB-URL-HERE-Example:jdbc:oracle:thin:@localhost:1521:XE
+                                                                  spring.datasource.username=--INSERT-USER-NAME--
+                                                                  spring.datasource.password=--INSERT-PASSWORD--
+                                                                  spring.datasource.driverClassName=oracle.jdbc.OracleDriver
+                                                                  spring.jpa.show-sql=true"""
+            );
+        });
     }
 
 
     @Test
     public void importsOracleDrivers() {
         addXMLFileToResource(xml);
-        runAction();
+        runAction(projectContext -> {
+            Set<String> declaredDependencies = projectContext
+                    .getBuildFile().getDeclaredDependencies()
+                    .stream()
+                    .map(dependency -> dependency.getGroupId() + ":" + dependency.getArtifactId() + ":" + dependency.getVersion())
+                    .collect(Collectors.toSet());
 
-        Set<String> declaredDependencies = projectContext
-                .getBuildFile().getDeclaredDependencies()
-                .stream()
-                .map(dependency -> dependency.getGroupId() + ":" + dependency.getArtifactId() + ":" + dependency.getVersion())
-                .collect(Collectors.toSet());
-
-        assertThat(declaredDependencies).contains("com.oracle.ojdbc:ojdbc10:19.3.0.0");
+            assertThat(declaredDependencies).contains("com.oracle.ojdbc:ojdbc10:19.3.0.0");
+        });
     }
 }

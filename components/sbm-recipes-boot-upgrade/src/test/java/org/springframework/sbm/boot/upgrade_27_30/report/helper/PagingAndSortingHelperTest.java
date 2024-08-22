@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.sbm.boot.upgrade_27_30.report.helper;
 
 import org.intellij.lang.annotations.Language;
@@ -47,8 +46,8 @@ public class PagingAndSortingHelperTest {
 
         ProjectContext context = TestProjectContext.buildProjectContext()
                 .withSpringBootParentOf("2.7.1")
-                .addJavaSource("src/main/java", javaClassWithPagingAndSortingRepository)
-                .addJavaSource("src/main/java",javaClassWithoutPagingAndSortingRepo)
+                .withJavaSource("src/main/java", javaClassWithPagingAndSortingRepository)
+                .withJavaSource("src/main/java",javaClassWithoutPagingAndSortingRepo)
                 .withBuildFileHavingDependencies("org.springframework.data:spring-data-commons:2.7.1")
                 .build();
 
@@ -76,9 +75,7 @@ public class PagingAndSortingHelperTest {
                                                                 
                                 ==== Remediation
                                 If one requires the old behavior one must extend not only the sorting repository, but also the respective CRUD repository explicitly. This was done so the sorting support could easily be combined with the List repositories introduced above.
-                                
-                                
-                                    """
+                                """
                 );
     }
 
@@ -106,8 +103,8 @@ public class PagingAndSortingHelperTest {
 
         ProjectContext context = TestProjectContext.buildProjectContext()
                 .withSpringBootParentOf("2.7.1")
-                .addJavaSource("src/main/java", javaClassWithReactiveSortingRepo)
-                .addJavaSource("src/main/java",javaClassWithoutReactiveSortingRepo)
+                .withJavaSource("src/main/java", javaClassWithReactiveSortingRepo)
+                .withJavaSource("src/main/java",javaClassWithoutReactiveSortingRepo)
                 .withBuildFileHavingDependencies("org.springframework.data:spring-data-commons:2.7.1")
                 .withBuildFileHavingDependencies("io.projectreactor:reactor-core:3.4.19")
                 .build();
@@ -135,9 +132,7 @@ public class PagingAndSortingHelperTest {
                                                                 
                                                                 
                                 ==== Remediation
-                                If one requires the old behavior one must extend not only the sorting repository, but also the respective CRUD repository explicitly. This was done so the sorting support could easily be combined with the List repositories introduced above.
-                                          
-                                                                
+                                If one requires the old behavior one must extend not only the sorting repository, but also the respective CRUD repository explicitly. This was done so the sorting support could easily be combined with the List repositories introduced above.                         
                                 """
                 );
     }
@@ -166,8 +161,8 @@ public class PagingAndSortingHelperTest {
 
         ProjectContext context = TestProjectContext.buildProjectContext()
                 .withSpringBootParentOf("2.7.1")
-                .addJavaSource("src/main/java", javaClassWithReactiveSortingRepo)
-                .addJavaSource("src/main/java",javaClassWithoutReactiveSortingRepo)
+                .withJavaSource("src/main/java", javaClassWithReactiveSortingRepo)
+                .withJavaSource("src/main/java",javaClassWithoutReactiveSortingRepo)
                 .withBuildFileHavingDependencies("org.springframework.data:spring-data-commons:2.7.1")
                 .withBuildFileHavingDependencies("io.reactivex.rxjava3:rxjava:3.1.5")
                 .build();
@@ -196,9 +191,7 @@ public class PagingAndSortingHelperTest {
                                                                 
                                 ==== Remediation
                                 If one requires the old behavior one must extend not only the sorting repository, but also the respective CRUD repository explicitly. This was done so the sorting support could easily be combined with the List repositories introduced above.
-                                
-                                
-                                    """
+                                """
                 );
     }
 
@@ -250,10 +243,10 @@ public class PagingAndSortingHelperTest {
 
         ProjectContext context = TestProjectContext.buildProjectContext()
                 .withSpringBootParentOf("2.7.1")
-                .addJavaSource("src/main/java", javaClassWithPagingAndSortingRepository)
-                .addJavaSource("src/main/java",javaClassWithoutPagingAndSortingRepo)
-                .addJavaSource("src/main/java",javaClassWithReactiveSortingRepo)
-                .addJavaSource("src/main/java",javaClassWithRXReactiveSortingRepo)
+                .withJavaSource("src/main/java", javaClassWithPagingAndSortingRepository)
+                .withJavaSource("src/main/java",javaClassWithoutPagingAndSortingRepo)
+                .withJavaSource("src/main/java",javaClassWithReactiveSortingRepo)
+                .withJavaSource("src/main/java",javaClassWithRXReactiveSortingRepo)
                 .withBuildFileHavingDependencies("org.springframework.data:spring-data-commons:2.7.1")
                 .withBuildFileHavingDependencies("io.reactivex.rxjava3:rxjava:3.1.5")
                 .withBuildFileHavingDependencies("io.projectreactor:reactor-core:3.4.19")
@@ -291,8 +284,6 @@ public class PagingAndSortingHelperTest {
                                                                 
                                 ==== Remediation
                                 If one requires the old behavior one must extend not only the sorting repository, but also the respective CRUD repository explicitly. This was done so the sorting support could easily be combined with the List repositories introduced above.
-                                           
-                                                                
                                 """
                 );
     }
@@ -309,7 +300,7 @@ public class PagingAndSortingHelperTest {
 
         ProjectContext context = TestProjectContext.buildProjectContext()
                 .withSpringBootParentOf("2.7.1")
-                .addJavaSource("src/main/java",javaClassWithoutPagingAndSortingRepo)
+                .withJavaSource("src/main/java",javaClassWithoutPagingAndSortingRepo)
                 .withBuildFileHavingDependencies("org.springframework.data:spring-data-commons:2.7.1")
                 .build();
 

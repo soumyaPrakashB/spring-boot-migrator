@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,18 +30,21 @@ public class Boot_24_25_UpdateDependenciesRecipeTest {
         // TODO: Move to a more generic Action to be reused, e.g. 'UpgradeParentVersion'
         String applicationDir = "spring-boot-2.4-to-2.5-example";
         Path from = Path.of("./testcode").resolve(applicationDir).resolve("given");
-        RecipeIntegrationTestSupport.initializeProject(from, applicationDir)
+        RecipeIntegrationTestSupport
+                .initializeProject(from, applicationDir)
                 .andApplyRecipe("boot-2.4-2.5-dependency-version-update");
 
         Path resultDir = RecipeIntegrationTestSupport.getResultDir(applicationDir);
 
-        assertThat(contentOf(resultDir.resolve("pom.xml").toFile())).contains(
-                "    <parent>\n" +
-                "        <groupId>org.springframework.boot</groupId>\n" +
-                "        <artifactId>spring-boot-starter-parent</artifactId>\n" +
-                "        <version>2.5.6</version>\n" +
-                "        <relativePath/> <!-- lookup parent from repository -->\n" +
-                "    </parent>"
+        assertThat(contentOf(resultDir.resolve("pom.xml").toFile())).containsIgnoringWhitespaces(
+                """
+                <parent>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-parent</artifactId>
+                    <version>2.5.6</version>
+                    <relativePath/> <!-- lookup parent from repository -->
+                </parent>
+                """
         );
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -161,7 +161,28 @@ public class ConvertJaxRsAnnotations extends AbstractAction {
         if (found.isPresent()) {
             type.removeAnnotation(found.get());
             type.addAnnotation("org.springframework.web.bind.annotation.RestController");
-            String rmAttrs = found.get().getAttributes().entrySet().stream().map(e -> e.getKey() + " = " + e.getValue().print()).collect(Collectors.joining(", "));
+            Map<String, Expression> attributes = new LinkedHashMap<>(found.get().getAttributes());
+            for (Annotation a : annotations) {
+                if (a == null) {
+                    continue;
+                }
+                String fullyQualifiedName = a.getFullyQualifiedName();
+                if (fullyQualifiedName != null) {
+                    switch (fullyQualifiedName) {
+                        case "javax.ws.rs.Consumes" -> {
+                            attributes.put("consumes", a.getAttribute("value"));
+                            type.removeAnnotation(a);
+                        }
+                        case "javax.ws.rs.Produces" -> {
+                            attributes.put("produces", a.getAttribute("value"));
+                            type.removeAnnotation(a);
+                        }
+                        default -> {
+                        }
+                    }
+                }
+            }
+            String rmAttrs = attributes.entrySet().stream().map(e -> e.getKey() + " = " + e.getValue().print()).collect(Collectors.joining(", "));
             type.addAnnotation("@RequestMapping(" + rmAttrs + ")", "org.springframework.web.bind.annotation.RequestMapping");
         }
     }

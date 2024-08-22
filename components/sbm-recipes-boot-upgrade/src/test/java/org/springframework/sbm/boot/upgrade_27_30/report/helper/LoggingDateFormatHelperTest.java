@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,11 @@
  */
 package org.springframework.sbm.boot.upgrade_27_30.report.helper;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.sbm.boot.properties.SpringApplicationPropertiesPathMatcher;
 import org.springframework.sbm.boot.properties.SpringBootApplicationPropertiesRegistrar;
 import org.springframework.sbm.engine.context.ProjectContext;
+import org.springframework.sbm.openrewrite.RewriteExecutionContext;
 import org.springframework.sbm.project.resource.TestProjectContext;
 import org.springframework.sbm.properties.api.PropertiesSource;
 
@@ -39,8 +39,8 @@ public class LoggingDateFormatHelperTest {
                 .buildProjectContext()
                 .withSpringBootParentOf("2.7.5")
                 .addRegistrar(
-                        new SpringBootApplicationPropertiesRegistrar(new SpringApplicationPropertiesPathMatcher()))
-                .addProjectResource("src/main/resources/application-myprofile.properties", "not.logging.pattern.dateformat=value")
+                        new SpringBootApplicationPropertiesRegistrar(new SpringApplicationPropertiesPathMatcher(), new RewriteExecutionContext()))
+                .withProjectResource("src/main/resources/application-myprofile.properties", "not.logging.pattern.dateformat=value")
                 .build();
 
         LoggingDateFormatHelper sut = new LoggingDateFormatHelper();
@@ -72,8 +72,8 @@ public class LoggingDateFormatHelperTest {
     void isNotApplicableWithExistingPropertiesFileContainingRelevantProperty() {
         ProjectContext context = TestProjectContext
                 .buildProjectContext()
-                .addRegistrar(new SpringBootApplicationPropertiesRegistrar(new SpringApplicationPropertiesPathMatcher()))
-                .addProjectResource("src/main/resources/application-myprofile.properties", "logging.pattern.dateformat=some-format")
+                .addRegistrar(new SpringBootApplicationPropertiesRegistrar(new SpringApplicationPropertiesPathMatcher(), new RewriteExecutionContext()))
+                .withProjectResource("src/main/resources/application-myprofile.properties", "logging.pattern.dateformat=some-format")
                 .build();
 
         LoggingDateFormatHelper sut = new LoggingDateFormatHelper();

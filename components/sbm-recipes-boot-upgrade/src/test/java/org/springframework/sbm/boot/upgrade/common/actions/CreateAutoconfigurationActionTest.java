@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.springframework.sbm.engine.context.ProjectContext;
 import org.springframework.sbm.project.resource.ProjectResource;
 import org.springframework.sbm.project.resource.TestProjectContext;
 
+import java.nio.file.Path;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,7 +39,7 @@ class CreateAutoconfigurationActionTest {
     @BeforeEach
     public void setup() {
         context = TestProjectContext.buildProjectContext()
-                .addProjectResource(
+                .withProjectResource(
                         "src/main/resources/META-INF/spring.factories",
                         """
                                 hello.world=something
@@ -71,7 +72,7 @@ class CreateAutoconfigurationActionTest {
 
         String content = getSpringFactoryFile();
 
-        assertThat(content).isEqualTo("""
+        assertThat(content).isEqualToIgnoringNewLines("""
                 hello.world=something
                 """);
     }
@@ -79,7 +80,7 @@ class CreateAutoconfigurationActionTest {
     @Test
     public void shouldMoveMultipleProperties() {
         context = TestProjectContext.buildProjectContext()
-                .addProjectResource(
+                .withProjectResource(
                         "src/main/resources/META-INF/spring.factories",
                         """
                                 hello.world=something
@@ -128,15 +129,13 @@ class CreateAutoconfigurationActionTest {
     private void assertSpringConfigFileContentsInProject(String project) {
         List<ProjectResource> content = getAutoConfigFileAsProjectResource();
         assertThat(content).hasSize(1);
-        assertThat(content.get(0).getAbsolutePath().toString())
-                .isEqualTo(TestProjectContext.getDefaultProjectRoot()
-                        + "/" + project + "/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports");
+        assertThat(content.get(0).getAbsolutePath())
+                .isEqualTo(TestProjectContext.getDefaultProjectRoot().resolve(project).resolve("src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports"));
 
         List<ProjectResource> oldFile = getFileAsProjectResource(EXISTING_SPRING_FACTORIES_FILE);
         assertThat(oldFile).hasSize(1);
-        assertThat(oldFile.get(0).getAbsolutePath().toString())
-                .isEqualTo(TestProjectContext.getDefaultProjectRoot() +
-                        "/" + project + "/src/main/resources/META-INF/spring.factories");
+        assertThat(oldFile.get(0).getAbsolutePath())
+                .isEqualTo(TestProjectContext.getDefaultProjectRoot().resolve(project).resolve("src/main/resources/META-INF/spring.factories"));
 
         assertThat(oldFile.get(0).print()).isEqualTo("");
     }
@@ -144,7 +143,7 @@ class CreateAutoconfigurationActionTest {
     private ProjectContext moduleInModuleProjectContext() {
         return TestProjectContext.
                 buildProjectContext()
-                .addProjectResource("pom.xml",
+                .withProjectResource("pom.xml",
                         """
                                 <?xml version="1.0" encoding="UTF-8"?>
                                 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -159,7 +158,7 @@ class CreateAutoconfigurationActionTest {
                                     <name>root</name>
                                 </project>
                                 """)
-                .addProjectResource("app/pom.xml",
+                .withProjectResource("app/pom.xml",
                         """
                                 <?xml version="1.0" encoding="UTF-8"?>
                                                                 
@@ -179,7 +178,7 @@ class CreateAutoconfigurationActionTest {
                                     </modules>
                                 </project>
                                 """)
-                .addProjectResource("app/spring-app/pom.xml",
+                .withProjectResource("app/spring-app/pom.xml",
                         """
                                 <?xml version="1.0" encoding="UTF-8"?>
                                                                 
@@ -196,7 +195,7 @@ class CreateAutoconfigurationActionTest {
                                     <artifactId>spring-app</artifactId>
                                 </project>
                                 """)
-                .addProjectResource("app/spring-app/src/main/resources/META-INF/spring.factories",
+                .withProjectResource("app/spring-app/src/main/resources/META-INF/spring.factories",
                         """
                                 org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.hello.GreetingConfig
                                 """)
@@ -206,7 +205,7 @@ class CreateAutoconfigurationActionTest {
     private ProjectContext setupMultiMavenSpringModule() {
         return TestProjectContext.
                 buildProjectContext()
-                .addProjectResource("pom.xml",
+                .withProjectResource("pom.xml",
                         """
                                 <?xml version="1.0" encoding="UTF-8"?>
                                 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -222,7 +221,7 @@ class CreateAutoconfigurationActionTest {
                                     <name>root</name>
                                 </project>
                                 """)
-                .addProjectResource("spring-app/pom.xml",
+                .withProjectResource("spring-app/pom.xml",
                         """
                                 <?xml version="1.0" encoding="UTF-8"?>
                                                                 
@@ -240,7 +239,7 @@ class CreateAutoconfigurationActionTest {
                                 </project>
                                                                 
                                 """)
-                .addProjectResource("spring-app/src/main/resources/META-INF/spring.factories",
+                .withProjectResource("spring-app/src/main/resources/META-INF/spring.factories",
                         """
                                 org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.hello.GreetingConfig
                                 """)

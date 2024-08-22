@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,9 @@
  */
 package org.springframework.sbm.jee.jpa.actions;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.openrewrite.ExecutionContext;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.sbm.boot.properties.actions.AddSpringBootApplicationPropertiesAction;
 import org.springframework.sbm.boot.properties.api.SpringBootApplicationProperties;
 import org.springframework.sbm.boot.properties.search.SpringBootApplicationPropertiesResourceListFilter;
@@ -29,17 +32,22 @@ import java.util.List;
 
 public class MigratePersistenceXmlToApplicationPropertiesAction extends AbstractAction {
 
+    @Autowired
+    @JsonIgnore
+    private ExecutionContext executionContext;
+
     @Override
     public void apply(ProjectContext context) {
         Module module = context.getApplicationModules().stream()
-                .filter(m -> m.search(new PersistenceXmlResourceFilter()).isPresent())
+                .filter(m -> m.search(new PersistenceXmlResourceFilter("**/src/main/resources/**")).isPresent())
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("No file 'META-INF/persistence.xml' could be found."));
 
-        PersistenceXml persistenceXml = module.search(new PersistenceXmlResourceFilter()).get();
+        PersistenceXml persistenceXml = module.search(new PersistenceXmlResourceFilter("**/src/main/resources/**")).get();
         List<SpringBootApplicationProperties> applicationProperties = module.search(new SpringBootApplicationPropertiesResourceListFilter());
         if (applicationProperties.isEmpty()) {
-            new AddSpringBootApplicationPropertiesAction().apply(module);
+            AddSpringBootApplicationPropertiesAction addSpringBootApplicationPropertiesAction = new AddSpringBootApplicationPropertiesAction(executionContext);
+            addSpringBootApplicationPropertiesAction.apply(module);
             applicationProperties = context.search(new SpringBootApplicationPropertiesResourceListFilter());
         }
         mapPersistenceXmlToApplicationProperties(applicationProperties.get(0), persistenceXml);
@@ -67,6 +75,6 @@ public class MigratePersistenceXmlToApplicationPropertiesAction extends Abstract
 
     @Override
     public boolean isApplicable(ProjectContext context) {
-        return context.search(new PersistenceXmlResourceFilter()).isPresent();
+        return context.search(new PersistenceXmlResourceFilter("**/src/main/resources/**")).isPresent();
     }
 }

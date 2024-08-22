@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.sbm.boot.common.finder;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -51,7 +50,7 @@ class SpringBeanMethodDeclarationFinderTest {
 
         @BeforeEach
         void beforeEach() {
-            builder.addJavaSource("src/main/java",
+            builder.withJavaSource("src/main/java",
                                           """
                                           import org.springframework.context.annotation.Configuration;
                                           import org.springframework.context.annotation.Bean;
@@ -66,7 +65,7 @@ class SpringBeanMethodDeclarationFinderTest {
                                           }
                                           """
                     )
-                    .addJavaSource("src/main/java",
+                    .withJavaSource("src/main/java",
                                            """
                                            package a.b.c;
                                            public class SomeBean {}
@@ -79,7 +78,7 @@ class SpringBeanMethodDeclarationFinderTest {
         void shouldReturnTheMatchingBeanDeclaration() {
             List<MatchingMethod> matches = builder.build().search(sut);
             assertThat(matches).hasSize(1);
-            assertThat(matches.get(0).getJavaSource().getSourcePath().toString()).isEqualTo("src/main/java/MyConfiguration.java");
+            assertThat(matches.get(0).getJavaSource().getSourcePathString()).isEqualTo("src/main/java/MyConfiguration.java");
             assertThat(matches.get(0).getType().getFullyQualifiedName()).isEqualTo("MyConfiguration");
             assertThat(matches.get(0).getMethod().getReturnValue().get()).isEqualTo("a.b.c.SomeBean");
             assertThat(matches.get(0).getMethod().getName()).isEqualTo("someBean");
@@ -91,7 +90,7 @@ class SpringBeanMethodDeclarationFinderTest {
 
         @BeforeEach
         void beforeEach() {
-            builder.addJavaSource("src/main/java",
+            builder.withJavaSource("src/main/java",
                                   """
                                   import org.springframework.context.annotation.Configuration;
                                   import org.springframework.context.annotation.Bean;
@@ -111,7 +110,7 @@ class SpringBeanMethodDeclarationFinderTest {
                                   }
                                   """
                     )
-                    .addJavaSource("src/main/java",
+                    .withJavaSource("src/main/java",
                                    """
                                    import org.springframework.context.annotation.Configuration;
                                    import org.springframework.context.annotation.Bean;
@@ -131,12 +130,12 @@ class SpringBeanMethodDeclarationFinderTest {
                                    }
                                    """
                     )
-                    .addJavaSource("src/main/java",
+                    .withJavaSource("src/main/java",
                                    """
                                    package a.b.c;
                                    public class SomeBean {}
                                    """)
-                    .addJavaSource("src/main/java",
+                    .withJavaSource("src/main/java",
                                    """
                                    package a.b.c;
                                    public class AnotherBean {}
@@ -149,12 +148,12 @@ class SpringBeanMethodDeclarationFinderTest {
         void shouldReturnTheMatchingBeanDeclarations() {
             List<MatchingMethod> matches = builder.build().search(sut);
             assertThat(matches).hasSize(2);
-            assertThat(matches.get(0).getJavaSource().getSourcePath().toString()).isEqualTo("src/main/java/MyConfiguration.java");
+            assertThat(matches.get(0).getJavaSource().getSourcePathString()).isEqualTo("src/main/java/MyConfiguration.java");
             assertThat(matches.get(0).getType().getFullyQualifiedName()).isEqualTo("MyConfiguration");
             assertThat(matches.get(0).getMethod().getReturnValue()).isPresent();
             assertThat(matches.get(0).getMethod().getReturnValue().get()).isEqualTo("a.b.c.SomeBean");
             assertThat(matches.get(0).getMethod().getName()).isEqualTo("someBean");
-            assertThat(matches.get(1).getJavaSource().getSourcePath().toString()).isEqualTo("src/main/java/MyConfiguration2.java");
+            assertThat(matches.get(1).getJavaSource().getSourcePathString()).isEqualTo("src/main/java/MyConfiguration2.java");
             assertThat(matches.get(1).getType().getFullyQualifiedName()).isEqualTo("MyConfiguration2");
             assertThat(matches.get(1).getMethod().getName()).isEqualTo("someBean2");
             assertThat(matches.get(1).getMethod().getReturnValue()).isPresent();
@@ -169,7 +168,7 @@ class SpringBeanMethodDeclarationFinderTest {
         @Test
         void shouldReturnEmptyListWithVoidReturnTypeOnBean() {
 
-            builder.addJavaSource("src/main/java",
+            builder.withJavaSource("src/main/java",
                             """
                             import org.springframework.context.annotation.Configuration;
                             import org.springframework.context.annotation.Bean;
@@ -190,4 +189,32 @@ class SpringBeanMethodDeclarationFinderTest {
         }
     }
 
+    @Nested
+    class WithUnresolvedSymbols {
+        @Test
+        void shouldIgnoreClassesWhenSymbolsCantBeResolved() {
+
+            SpringBeanMethodDeclarationFinder sut
+                    = new SpringBeanMethodDeclarationFinder("a.b.c.HelloWorld");
+            builder.withJavaSource("src/main/java",
+                            """
+                            import org.springframework.context.annotation.Configuration;
+                            import org.springframework.context.annotation.Bean;
+                            import a.b.c.HelloWorld;
+                            @Configuration
+                            public class MyConfiguration {
+                              @Bean
+                              HelloWorld someBean() {
+                                  return null;
+                              }
+                            }
+                            """
+                    )
+                    .withBuildFileHavingDependencies("org.springframework:spring-context:5.3.22");
+
+
+            List<MatchingMethod> output = builder.build().search(sut);
+            assertThat(output).hasSize(0);
+        }
+    }
 }

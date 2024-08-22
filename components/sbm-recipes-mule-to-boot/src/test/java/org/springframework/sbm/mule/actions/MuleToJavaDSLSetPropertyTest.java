@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.sbm.mule.actions;
 
 import org.junit.jupiter.api.Test;
@@ -37,25 +36,26 @@ public class MuleToJavaDSLSetPropertyTest extends JavaDSLActionBaseTest {
     @Test
     public void shouldGenerateSetPropertyStatements() {
         addXMLFileToResource(muleXml);
-        runAction();
-        assertThat(projectContext.getProjectJavaSources().list()).hasSize(1);
-        assertThat(getGeneratedJavaFile())
-                .isEqualTo(
-                        "package com.example.javadsl;\n" +
-                                "import org.springframework.context.annotation.Bean;\n" +
-                                "import org.springframework.context.annotation.Configuration;\n" +
-                                "import org.springframework.integration.dsl.IntegrationFlow;\n" +
-                                "import org.springframework.integration.dsl.IntegrationFlows;\n" +
-                                "import org.springframework.integration.http.dsl.Http;\n" +
-                                "\n" +
-                                "@Configuration\n" +
-                                "public class FlowConfigurations {\n" +
-                                "    @Bean\n" +
-                                "    IntegrationFlow http_routeFlow() {\n" +
-                                "        return IntegrationFlows.from(Http.inboundChannelAdapter(\"/test\")).handle((p, h) -> p)\n" +
-                                "                .enrichHeaders(h -> h.header(\"TestProperty\", \"TestPropertyValue\"))\n" +
-                                "                .get();\n" +
-                                "    }\n" +
-                                "}");
+        runAction(projectContext -> {
+            assertThat(projectContext.getProjectJavaSources().list()).hasSize(1);
+            assertThat(getGeneratedJavaFile())
+                    .isEqualTo("""
+                               package com.example.javadsl;
+                               import org.springframework.context.annotation.Bean;
+                               import org.springframework.context.annotation.Configuration;
+                               import org.springframework.integration.dsl.IntegrationFlow;
+                               import org.springframework.integration.dsl.IntegrationFlows;
+                               import org.springframework.integration.http.dsl.Http;
+                                                              
+                               @Configuration
+                               public class FlowConfigurations {
+                                   @Bean
+                                   IntegrationFlow http_routeFlow() {
+                                       return IntegrationFlows.from(Http.inboundGateway("/test")).handle((p, h) -> p)
+                                               .enrichHeaders(h -> h.header("TestProperty", "TestPropertyValue"))
+                                               .get();
+                                   }
+                               }""");
+        });
     }
 }

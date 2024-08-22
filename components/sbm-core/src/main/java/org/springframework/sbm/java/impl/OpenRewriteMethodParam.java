@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package org.springframework.sbm.java.impl;
 
+import org.openrewrite.ExecutionContext;
 import org.springframework.sbm.java.api.Annotation;
 import org.springframework.sbm.java.api.MethodParam;
 import org.springframework.sbm.java.refactoring.JavaRefactoring;
@@ -40,12 +41,14 @@ public class OpenRewriteMethodParam implements MethodParam {
 
     private final JavaRefactoring refactoring;
     private final JavaParser javaParser;
+    private final ExecutionContext executionContext;
 
-    public OpenRewriteMethodParam(RewriteSourceFileHolder<J.CompilationUnit> sourceFile, Statement statement, JavaRefactoring refactoring, JavaParser javaParser) {
+    public OpenRewriteMethodParam(RewriteSourceFileHolder<J.CompilationUnit> sourceFile, Statement statement, JavaRefactoring refactoring, JavaParser javaParser, ExecutionContext executionContext) {
         wrappedMethodParam = statement;
         this.sourceFile = sourceFile;
         this.refactoring = refactoring;
         this.javaParser = javaParser;
+        this.executionContext = executionContext;
     }
 
     @Override
@@ -66,7 +69,7 @@ public class OpenRewriteMethodParam implements MethodParam {
 
     @Override
     public void addAnnotation(String snippet, String annotationImport, String... otherImports) {
-        JavaParser javaParser = JavaParserFactory.getCurrentJavaParser();
+        JavaParser javaParser = JavaParserFactory.getCurrentJavaParser(executionContext);
         AddAnnotationVisitor visitor = new AddAnnotationVisitor(() -> javaParser, wrappedMethodParam, snippet, annotationImport, otherImports);
         refactoring.refactor(sourceFile, visitor);
     }

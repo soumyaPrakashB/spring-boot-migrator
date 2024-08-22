@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ public class RemovedPropertyTest {
                 "org.openrewrite.java.spring.boot3.SpringBootPropertiesManual_2_7_Removed");
 
         assertThat(result).hasSize(1);
-        assertThat(result.get(0).getAfter().printAll()).isEqualTo(testData.getRight());
+        assertThat(result.get(0).getAfter().printAll()).isEqualToNormalizingNewlines(testData.getRight());
     }
 
     private static Stream<Arguments> providePropertiesInputFiles() throws URISyntaxException  {

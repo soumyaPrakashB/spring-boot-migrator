@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ public class ChangesToDataPropertiesHelper extends SpringBootUpgradeReportSectio
         data = new HashMap<>();
 
         search.forEach(p -> {
-            Path absolutePath = p.getAbsolutePath();
+            String absolutePath = p.getAbsolutePathString();
             List<Object> propertiesFound = p
                     .getProperties()
                     .keySet()
@@ -73,10 +73,10 @@ public class ChangesToDataPropertiesHelper extends SpringBootUpgradeReportSectio
                     .collect(Collectors.toList());
             if (!propertiesFound.isEmpty()) {
                 if (data.containsKey("matches")) {
-                    data.get("matches").add(new Match(absolutePath.toString(), p.getSourcePath().toString(), propertiesFound));
+                    data.get("matches").add(new Match(absolutePath, p.getSourcePathString(), propertiesFound));
                 } else {
                     List<Match> matches = new ArrayList<>();
-                    matches.add(new Match(absolutePath.toString(), p.getSourcePath().toString(), propertiesFound));
+                    matches.add(new Match(absolutePath, p.getSourcePathString(), propertiesFound));
                     data.put("matches", matches);
                 }
             }

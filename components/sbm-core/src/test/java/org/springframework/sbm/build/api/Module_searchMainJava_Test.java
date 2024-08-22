@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.sbm.build.api;
 
 import org.intellij.lang.annotations.Language;
@@ -79,12 +78,12 @@ public class Module_searchMainJava_Test {
             ProjectContext context = TestProjectContext
                     .buildProjectContext()
                     .withMavenBuildFileSource("pom.xml", singlePom)
-                    .addJavaSource("src/main/java", "public class SomeClass{}")
+                    .withJavaSource("src/main/java", "public class SomeClass{}")
                     .build();
 
             verifySearchMain(context, projectResourceSet -> {
                 assertThat(projectResourceSet.list()).hasSize(1);
-                assertThat(projectResourceSet.get(0).getSourcePath().toString()).isEqualTo("src/main/java/SomeClass.java");
+                assertThat(projectResourceSet.get(0).getSourcePathString()).isEqualTo("src/main/java/SomeClass.java");
                 assertThat(projectResourceSet.get(0).print()).isEqualTo("public class SomeClass{}");
             }, "");
         }
@@ -93,13 +92,13 @@ public class Module_searchMainJava_Test {
         @DisplayName("with classes in src/main/java and src/test/java provides ProjectResourceSet with classes from src/main/java")
         void withClassesInTestAndMain_providesClassesFromMain() {
             ProjectContext context = builder
-                    .addJavaSource("src/main/java", "public class SomeClass{}")
-                    .addJavaSource("src/test/java", "public class SomeClassTest{}")
+                    .withJavaSource("src/main/java", "public class SomeClass{}")
+                    .withJavaSource("src/test/java", "public class SomeClassTest{}")
                     .build();
 
             verifySearchMain(context, projectResourceSet -> {
                 assertThat(projectResourceSet.list()).hasSize(1);
-                assertThat(projectResourceSet.get(0).getSourcePath().toString()).isEqualTo("src/main/java/SomeClass.java");
+                assertThat(projectResourceSet.get(0).getSourcePathString()).isEqualTo("src/main/java/SomeClass.java");
                 assertThat(projectResourceSet.get(0).print()).isEqualTo("public class SomeClass{}");
             }, "");
         }
@@ -109,7 +108,7 @@ public class Module_searchMainJava_Test {
         void withClassesInSrcTestJava_providesEmptyProjectResources() {
 
             ProjectContext context = builder
-                    .addProjectResource("src/test/java/SomeClass.java", "public class SomeClass{}")
+                    .withProjectResource("src/test/java/SomeClass.java", "public class SomeClass{}")
                     .build();
 
             verifySearchMain(context, projectResourceSet -> assertThat(projectResourceSet.list()).isEmpty(), "");
@@ -202,7 +201,7 @@ public class Module_searchMainJava_Test {
         void withClassesInOtherModules_providesEmptyProjectResources() {
 
             ProjectContext context = builder
-                    .addJavaSource("component/src/main/java", "public class SomeClass{}")
+                    .withJavaSource("component/src/main/java", "public class SomeClass{}")
                     .build();
 
             verifySearchMain(context, (projectResourceSet) -> assertThat(projectResourceSet.list()).isEmpty(),
@@ -214,14 +213,14 @@ public class Module_searchMainJava_Test {
         void withClassesInMainAndTest_providesClassesFromSrcMainJava() {
 
             ProjectContext context = builder
-                    .addJavaSource("application/src/main/java", "public class SomeClass{}")
-                    .addJavaSource("application/src/test/java", "public class SomeClassTest{}")
+                    .withJavaSource("application/src/main/java", "public class SomeClass{}")
+                    .withJavaSource("application/src/test/java", "public class SomeClassTest{}")
                     .build();
 
             verifySearchMain(context,
                              (projectResourceSet) -> {
                                 assertThat(projectResourceSet.list()).hasSize(1);
-                                assertThat(projectResourceSet.list().get(0).getSourcePath().toString()).isEqualTo("application/src/main/java/SomeClass.java");
+                                assertThat(projectResourceSet.list().get(0).getSourcePathString()).isEqualTo("application/src/main/java/SomeClass.java");
                                 assertThat(projectResourceSet.list().get(0).print()).isEqualTo("public class SomeClass{}");
                             },
                              "application");
@@ -232,13 +231,13 @@ public class Module_searchMainJava_Test {
         void withClassesInMain_providesClassesFromSrcMainJava() {
 
             ProjectContext context = builder
-                    .addJavaSource("application/src/main/java", "public class SomeClass{}")
+                    .withJavaSource("application/src/main/java", "public class SomeClass{}")
                     .build();
 
             verifySearchMain(context,
                              projectResourceSet -> {
                                 assertThat(projectResourceSet.list()).hasSize(1);
-                                assertThat(projectResourceSet.list().get(0).getSourcePath().toString()).isEqualTo("application/src/main/java/SomeClass.java");
+                                assertThat(projectResourceSet.list().get(0).getSourcePathString()).isEqualTo("application/src/main/java/SomeClass.java");
                                 assertThat(projectResourceSet.list().get(0).print()).isEqualTo("public class SomeClass{}");
                             },
                              "application");

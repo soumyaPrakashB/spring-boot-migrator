@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,22 +81,11 @@ public class DependencyHelper {
                 version = parts[2];
             }
 
-
-            MavenRepository mavenRepository = new MavenRepository(
-                    "jcenter",
-                    "https://jcenter.bintray.com",
-                    true,
-                    true,
-                    true,
-                    null,
-                    null
-            );
-
             @Nullable String classifier = null;
             @Nullable String type = null;
             String scope = Scope.Compile.name();
             List<GroupArtifact> exclusions = new ArrayList<>();
-            boolean optional = false;
+            String optional = null;
 
             Dependency dependency = new Dependency(
                     new GroupArtifactVersion(groupId, artifactId, version),

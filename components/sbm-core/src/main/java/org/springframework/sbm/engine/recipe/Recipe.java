@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@ package org.springframework.sbm.engine.recipe;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.springframework.sbm.engine.context.ProjectContext;
 import lombok.*;
+import org.springframework.sbm.engine.context.ProjectContext;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
@@ -147,4 +147,6 @@ public class Recipe {
                 numAutomated == 0 ? RecipeAutomation.MANUAL : RecipeAutomation.PARTIALLY_AUTOMATED;
         return automationInfo;
     }
+
+
 }

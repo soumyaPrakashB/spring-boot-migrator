@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,13 +28,13 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 public class ReplaceTypeAction extends AbstractAction {
 
-    private String annotation;
+    private String existingType;
 
-    private String withAnnotation;
+    private String withType;
 
     @Override
     public void apply(ProjectContext context) {
-        context.getProjectJavaSources().replaceType(annotation, withAnnotation);
+        context.getProjectJavaSources().replaceType(existingType, withType);
     }
 }
 

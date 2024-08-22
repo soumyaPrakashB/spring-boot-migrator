@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import org.springframework.sbm.engine.context.ProjectContext;
 import org.springframework.sbm.jee.ejb.api.DescriptionType;
 import org.springframework.sbm.jee.ejb.api.SessionBeanType;
 import org.springframework.sbm.jee.ejb.api.EjbJarXml;
-import org.springframework.sbm.jee.ejb.filter.EjbJarXmlResourceFilter;
+import org.springframework.sbm.jee.ejb.filter.EjbJarXmlResourceFinder;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
@@ -35,7 +35,7 @@ import java.util.Optional;
 public class MigrateEjbDeploymentDescriptor extends AbstractAction {
     @Override
     public void apply(ProjectContext context) {
-        Optional<EjbJarXml> ejbJarXml = context.search(new EjbJarXmlResourceFilter());
+        Optional<EjbJarXml> ejbJarXml = context.search(new EjbJarXmlResourceFinder());
         if (ejbJarXml.isPresent()) {
             migrateEjbDeploymentDescriptor(context, ejbJarXml.get());
         }

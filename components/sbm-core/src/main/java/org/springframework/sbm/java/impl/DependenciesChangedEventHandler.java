@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,13 @@
  */
 package org.springframework.sbm.java.impl;
 
+import org.openrewrite.ExecutionContext;
 import org.springframework.sbm.build.api.DependenciesChangedEvent;
 import org.springframework.sbm.engine.context.ProjectContextHolder;
-import org.springframework.sbm.openrewrite.RewriteExecutionContext;
 import lombok.RequiredArgsConstructor;
 import org.openrewrite.Parser;
 import org.openrewrite.java.JavaParser;
 import org.openrewrite.java.tree.J;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
@@ -38,29 +37,26 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class DependenciesChangedEventHandler {
     private final ProjectContextHolder projectContextHolder;
-    private final ApplicationEventPublisher applicationEventPublisher;
-    private JavaParser javaParser;
+    private final JavaParser javaParser;
+    private final ExecutionContext executionContext;
 
     @EventListener
     public void onDependenciesChanged(DependenciesChangedEvent event) {
         if (projectContextHolder.getProjectContext() != null) {
-            Set<Parser.Input> compilationUnitsSet = projectContextHolder.getProjectContext().getProjectJavaSources().asStream()
+            Set<Parser.Input> compilationUnitsSet = projectContextHolder.getProjectContext().getProjectJavaSources().stream()
                     .map(js -> js.getResource().getSourceFile())
                     .map(js -> new Parser.Input(js.getSourcePath(), () -> new ByteArrayInputStream(js.printAll().getBytes(StandardCharsets.UTF_8))))
                     .collect(Collectors.toSet());
             List<Parser.Input> compilationUnits = new ArrayList<>(compilationUnitsSet);
 
             Path projectRootDirectory = projectContextHolder.getProjectContext().getProjectRootDirectory();
-            // FIXME: #7 only affected modules and source sets must be parsed
-            javaParser = JavaParser.fromJavaVersion().classpath(ClasspathRegistry.getInstance().getCurrentDependencies()).build();
-            //javaParser.setClasspath(ClasspathRegistry.getInstance().getCurrentDependencies());
-            // FIXME: #7 handle "test"
-            // FIXME: #7 Provide a unified interface that calculates source set names by path
             javaParser.setSourceSet("main");
-            List<J.CompilationUnit> parsedCompilationUnits = javaParser.parseInputs(compilationUnits, null, new RewriteExecutionContext(applicationEventPublisher));
+            javaParser.setClasspath(ClasspathRegistry.getInstance().getCurrentDependencies());
+
+            List<J.CompilationUnit> parsedCompilationUnits = javaParser.parseInputs(compilationUnits, null, executionContext);
             // ((J.VariableDeclarations)parsedCompilationUnits.get(0).getClasses().get(0).getBody().getStatements().get(0)).getLeadingAnnotations().get(0).getType()
             parsedCompilationUnits.forEach(cu -> {
-                projectContextHolder.getProjectContext().getProjectJavaSources().asStream()
+                projectContextHolder.getProjectContext().getProjectJavaSources().stream()
                         .filter(js -> js.getResource().getAbsolutePath().equals(projectRootDirectory.resolve(cu.getSourcePath()).normalize()))
                         .forEach(js -> js.getResource().replaceWith(cu));
             });

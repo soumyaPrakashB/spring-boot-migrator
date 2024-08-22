@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 package org.springframework.sbm.boot.properties;
 
-import org.springframework.sbm.common.util.LinuxWindowsPathUnifier;
+import org.springframework.sbm.utils.LinuxWindowsPathUnifier;
 import org.springframework.stereotype.Component;
 
 import java.util.regex.Matcher;
@@ -24,11 +24,11 @@ import java.util.regex.Pattern;
 @Component
 public class SpringApplicationPropertiesPathMatcher {
     public static final int PROFILE_GROUP_INDEX = 2;
-    private String regex = "src/(main|test)/resources/[/\\w-]*application[-]{0,1}([-\\w]*).properties$";
-    private Pattern profilePattern = Pattern.compile(regex);
+    private static final String REGEX = "src/(main|test)/resources/[/\\w-]*application[-]{0,1}([-\\w]*).properties$";
+    private final Pattern profilePattern = Pattern.compile(REGEX);
 
     public Matcher match(String path) {
-        String unifiedPath = new LinuxWindowsPathUnifier().unifyPath(path);
+        String unifiedPath = LinuxWindowsPathUnifier.unifyPath(path);
         return profilePattern.matcher(unifiedPath);
     }
 }

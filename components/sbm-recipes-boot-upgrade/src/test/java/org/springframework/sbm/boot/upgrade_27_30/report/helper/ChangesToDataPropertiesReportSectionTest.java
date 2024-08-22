@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import org.springframework.sbm.boot.properties.SpringApplicationPropertiesPathMa
 import org.springframework.sbm.boot.properties.SpringBootApplicationPropertiesRegistrar;
 import org.springframework.sbm.boot.upgrade_27_30.report.SpringBootUpgradeReportTestSupport;
 import org.springframework.sbm.engine.context.ProjectContext;
+import org.springframework.sbm.openrewrite.RewriteExecutionContext;
 import org.springframework.sbm.project.resource.TestProjectContext;
 
 
@@ -34,9 +35,9 @@ public class ChangesToDataPropertiesReportSectionTest {
     void changesToDataPropertiesSection_renders() {
         ProjectContext context = TestProjectContext.buildProjectContext()
                 .withSpringBootParentOf("2.7.5")
-                .addRegistrar(new SpringBootApplicationPropertiesRegistrar(new SpringApplicationPropertiesPathMatcher()))
-                .addProjectResource("src/main/resources/application.properties", "spring.data.foo=bar")
-                .addProjectResource("src/main/resources/application-another.properties", "spring.data.here=there")
+                .addRegistrar(new SpringBootApplicationPropertiesRegistrar(new SpringApplicationPropertiesPathMatcher(), new RewriteExecutionContext()))
+                .withProjectResource("src/main/resources/application.properties", "spring.data.foo=bar")
+                .withProjectResource("src/main/resources/application-another.properties", "spring.data.here=there")
                 .build();
 
         SpringBootUpgradeReportTestSupport.generatedSection("Changes to Data Properties")
@@ -59,8 +60,6 @@ public class ChangesToDataPropertiesReportSectionTest {
                                            
                         ==== Remediation
                         Either add `spring-data` dependency, rename the property or remove it in case it's not required anymore.
-                                           
-                                           
                         """);
     }
 
@@ -69,9 +68,9 @@ public class ChangesToDataPropertiesReportSectionTest {
     void changesToDataPropertiesSection_notRendered() {
         ProjectContext context = TestProjectContext.buildProjectContext()
                 .withSpringBootParentOf("2.7.5")
-                .addRegistrar(new SpringBootApplicationPropertiesRegistrar(new SpringApplicationPropertiesPathMatcher()))
-                .addProjectResource("src/main/resources/application.properties", "data.foo=bar")
-                .addProjectResource("src/main/resources/application-another.properties", "data.here=there")
+                .addRegistrar(new SpringBootApplicationPropertiesRegistrar(new SpringApplicationPropertiesPathMatcher(), new RewriteExecutionContext()))
+                .withProjectResource("src/main/resources/application.properties", "data.foo=bar")
+                .withProjectResource("src/main/resources/application-another.properties", "data.here=there")
                 .build();
 
         SpringBootUpgradeReportTestSupport.generatedSection("Changes to Data Properties")

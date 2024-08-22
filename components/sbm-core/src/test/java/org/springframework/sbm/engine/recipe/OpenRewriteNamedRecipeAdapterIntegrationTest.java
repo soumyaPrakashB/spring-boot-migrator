@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.sbm.engine.recipe;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.sbm.engine.context.ProjectContext;
+import org.springframework.sbm.openrewrite.RewriteExecutionContext;
 import org.springframework.sbm.project.RewriteSourceFileWrapper;
 import org.springframework.sbm.project.resource.ResourceHelper;
 import org.springframework.sbm.project.resource.TestProjectContext;
+import org.springframework.sbm.scopes.ExecutionScope;
+import org.springframework.sbm.scopes.ScanScope;
+import org.springframework.sbm.scopes.ScopeConfiguration;
 import org.springframework.validation.beanvalidation.CustomValidatorBean;
 
 import java.io.IOException;
@@ -38,10 +41,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
         ActionDeserializerRegistry.class,
         DefaultActionDeserializer.class,
         RewriteMigrationResultMerger.class,
-        RewriteRecipeRunner.class,
         RewriteSourceFileWrapper.class,
         RewriteRecipeLoader.class,
-        CustomValidatorBean.class
+        CustomValidatorBean.class,
+        RewriteExecutionContext.class,
+        ScanScope.class,
+        ExecutionScope.class,
+        ScopeConfiguration.class
 })
 public class OpenRewriteNamedRecipeAdapterIntegrationTest {
 
@@ -71,7 +77,7 @@ public class OpenRewriteNamedRecipeAdapterIntegrationTest {
                 "}\n";
 
         ProjectContext context = TestProjectContext.buildProjectContext()
-                .addJavaSource("src/main/java", javaSource)
+                .withJavaSource("src/main/java", javaSource)
                 .build();
         // and apply the adapter
         recipeAdapter.apply(context);
@@ -103,7 +109,7 @@ public class OpenRewriteNamedRecipeAdapterIntegrationTest {
                 "public class Foo {}";
 
         ProjectContext context = TestProjectContext.buildProjectContext()
-                .addJavaSource("src/main/java", javaSource)
+                .withJavaSource("src/main/java", javaSource)
                 .build();
 
         RuntimeException thrown = assertThrows(RuntimeException.class, () -> recipeAdapter.apply(context));

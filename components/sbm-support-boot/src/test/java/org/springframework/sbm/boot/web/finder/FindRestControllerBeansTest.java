@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.sbm.boot.web.finder;
 
 import org.junit.jupiter.api.Test;
@@ -46,7 +45,7 @@ class FindRestControllerBeansTest {
         ProjectContext context = TestProjectContext
                 .buildProjectContext()
                 .withBuildFileHavingDependencies("org.springframework:spring-web:5.3.22")
-                .addJavaSource("src/main/java", restController)
+                .withJavaSource("src/main/java", restController)
                 .build();
 
         List<RestControllerBean> restControllerBeans = context.search(new FindRestControllerBeans());

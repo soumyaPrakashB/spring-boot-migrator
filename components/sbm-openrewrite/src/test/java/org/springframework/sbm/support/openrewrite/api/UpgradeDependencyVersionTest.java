@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package org.springframework.sbm.support.openrewrite.api;
 
+import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.openrewrite.InMemoryExecutionContext;
@@ -22,81 +23,86 @@ import org.openrewrite.RecipeRun;
 import org.openrewrite.maven.MavenParser;
 import org.openrewrite.maven.UpgradeDependencyVersion;
 import org.openrewrite.xml.tree.Xml;
+import org.springframework.sbm.helpers.DependencyVersionHelper;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Disabled
+@Disabled("""
+    Disabling this test as its already tested in open rewrite and also,
+    testUpgradeDependency_latestReleaseVersion is flaky based on the latest version of
+    Spring.
+    """)
 public class UpgradeDependencyVersionTest {
 
+    @Language("xml")
     public static final String POM_XML =
-            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                    + "<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-                    + "    xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd\">\n"
-                    + "    <modelVersion>4.0.0</modelVersion>\n"
-//                        + "    <parent>\n"
-//                        + "        <groupId>org.springframework.boot</groupId>\n"
-//                        + "        <artifactId>spring-boot-starter-parent</artifactId>\n"
-//                        + "        <version>2.4.5</version>\n"
-//                        + "        <relativePath/> <!-- lookup parent from repository -->\n"
-//                        + "    </parent>\n"
-                    + "    <groupId>com.example</groupId>\n"
-                    + "    <artifactId>boot-23-app</artifactId>\n"
-                    + "    <version>0.0.1-SNAPSHOT</version>\n"
-                    + "    <name>boot-23-app</name>\n"
-                    + "    <description>Demo project for Spring Boot</description>\n"
-                    + "    <properties>\n"
-                    + "        <java.version>11</java.version>\n"
-                    + "    </properties>\n"
-                    + "    <dependencies>\n"
-                    + "        <dependency>\n"
-                    + "            <groupId>org.springframework.boot</groupId>\n"
-                    + "            <artifactId>spring-boot-starter-data-jpa</artifactId>\n"
-                    + "            <version>2.4.5</version>\n"
-                    + "        </dependency>\n"
-                    + "        <dependency>\n"
-                    + "            <groupId>org.springframework.boot</groupId>\n"
-                    + "            <artifactId>spring-boot-starter-test</artifactId>\n"
-                    + "            <scope>test</scope>\n"
-                    + "            <version>2.4.5</version>\n"
-                    + "        </dependency>\n"
-                    + "    </dependencies>\n"
-                    + "</project>";
+            """
+            <?xml version="1.0" encoding="UTF-8"?>
+            <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+                <modelVersion>4.0.0</modelVersion>
+                <groupId>com.example</groupId>
+                <artifactId>boot-23-app</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+                <name>boot-23-app</name>
+                <description>Demo project for Spring Boot</description>
+                <properties>
+                    <java.version>11</java.version>
+                </properties>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-starter-data-jpa</artifactId>
+                        <version>2.4.5</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-starter-test</artifactId>
+                        <scope>test</scope>
+                        <version>2.4.5</version>
+                    </dependency>
+                </dependencies>
+            </project>
+            """;
 
     private final List<Xml.Document> mavens = MavenParser.builder().build().parse(POM_XML);
 
     @Test
-    @Disabled
     void testUpgradeDependency() {
+        @Language("xml")
         String expectedPomXml =
-                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                        + "<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
-                        "    xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" +
-                        "    <modelVersion>4.0.0</modelVersion>\n" +
-                        "    <groupId>com.example</groupId>\n" +
-                        "    <artifactId>boot-23-app</artifactId>\n" +
-                        "    <version>0.0.1-SNAPSHOT</version>\n" +
-                        "    <name>boot-23-app</name>\n" +
-                        "    <description>Demo project for Spring Boot</description>\n" +
-                        "    <properties>\n" +
-                        "        <java.version>11</java.version>\n" +
-                        "    </properties>\n" +
-                        "    <dependencies>\n" +
-                        "        <dependency>\n" +
-                        "            <groupId>org.springframework.boot</groupId>\n" +
-                        "            <artifactId>spring-boot-starter-data-jpa</artifactId>\n" +
-                        "            <version>2.4.5</version>\n" +
-                        "        </dependency>\n" +
-                        "        <dependency>\n" +
-                        "            <groupId>org.springframework.boot</groupId>\n" +
-                        "            <artifactId>spring-boot-starter-test</artifactId>\n" +
-                        "            <scope>test</scope>\n" +
-                        "            <version>2.5.3</version>\n" +
-                        "        </dependency>\n" +
-                        "    </dependencies>\n" +
-                        "</project>";
+                """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+                    <modelVersion>4.0.0</modelVersion>
+                    <groupId>com.example</groupId>
+                    <artifactId>boot-23-app</artifactId>
+                    <version>0.0.1-SNAPSHOT</version>
+                    <name>boot-23-app</name>
+                    <description>Demo project for Spring Boot</description>
+                    <properties>
+                        <java.version>11</java.version>
+                    </properties>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.springframework.boot</groupId>
+                            <artifactId>spring-boot-starter-data-jpa</artifactId>
+                            <version>2.4.5</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.springframework.boot</groupId>
+                            <artifactId>spring-boot-starter-test</artifactId>
+                            <scope>test</scope>
+                            <version>2.5.3</version>
+                        </dependency>
+                    </dependencies>
+                </project>
+                """;
 
         String groupId = "org.springframework.boot";
         String artifactId = "spring-boot-starter-test";
@@ -109,44 +115,42 @@ public class UpgradeDependencyVersionTest {
     }
 
     @Test
-    @Disabled
     void testUpgradeDependency_trustParent() {
+        @Language("xml")
         String expectedPomXml =
-                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                        + "<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
-                        "    xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" +
-                        "    <modelVersion>4.0.0</modelVersion>\n" +
-                        "    <parent>\n" +
-                        "       <groupId>com.example</groupId>\n" +
-                        "    <artifactId>boot-23-app</artifactId>\n" +
-                        "    </parent>\n" +
-                        "    <groupId>com.example</groupId>\n" +
-                        "    <artifactId>boot-23-app</artifactId>\n" +
-                        "    <version>0.0.1-SNAPSHOT</version>\n" +
-                        "    <name>boot-23-app</name>\n" +
-                        "    <description>Demo project for Spring Boot</description>\n" +
-                        "    <properties>\n" +
-                        "        <java.version>11</java.version>\n" +
-                        "    </properties>\n" +
-                        "    <dependencies>\n" +
-                        "        <dependency>\n" +
-                        "            <groupId>org.springframework.boot</groupId>\n" +
-                        "            <artifactId>spring-boot-starter-data-jpa</artifactId>\n" +
-                        "            <version>2.4.5</version>\n" +
-                        "        </dependency>\n" +
-                        "        <dependency>\n" +
-                        "            <groupId>org.springframework.boot</groupId>\n" +
-                        "            <artifactId>spring-boot-starter-test</artifactId>\n" +
-                        "            <scope>test</scope>\n" +
-                        "            <version>2.6.1</version>\n" +
-                        "        </dependency>\n" +
-                        "    </dependencies>\n" +
-                        "</project>";
+                """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+                    <modelVersion>4.0.0</modelVersion>
+                    <groupId>com.example</groupId>
+                    <artifactId>boot-23-app</artifactId>
+                    <version>0.0.1-SNAPSHOT</version>
+                    <name>boot-23-app</name>
+                    <description>Demo project for Spring Boot</description>
+                    <properties>
+                        <java.version>11</java.version>
+                    </properties>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.springframework.boot</groupId>
+                            <artifactId>spring-boot-starter-data-jpa</artifactId>
+                            <version>2.4.5</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.springframework.boot</groupId>
+                            <artifactId>spring-boot-starter-test</artifactId>
+                            <scope>test</scope>
+                            <version>2.5.3</version>
+                        </dependency>
+                    </dependencies>
+                </project>
+                """;
 
         String groupId = "org.springframework.boot";
         String artifactId = "spring-boot-starter-test";
         String version = "2.5.3";
-        UpgradeDependencyVersion sut = new UpgradeDependencyVersion(groupId, artifactId, version, null, true);
+        UpgradeDependencyVersion sut = new UpgradeDependencyVersion(groupId, artifactId, version, null, true, List.of());
 
         RecipeRun recipeRun = sut.run(mavens);
 
@@ -154,44 +158,54 @@ public class UpgradeDependencyVersionTest {
     }
 
     @Test
-    @Disabled
     void testUpgradeDependency_latestReleaseVersion() {
-        String expectedPomXml =
-                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                        + "<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
-                        "    xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" +
-                        "    <modelVersion>4.0.0</modelVersion>\n" +
-                        "    <groupId>com.example</groupId>\n" +
-                        "    <artifactId>boot-23-app</artifactId>\n" +
-                        "    <version>0.0.1-SNAPSHOT</version>\n" +
-                        "    <name>boot-23-app</name>\n" +
-                        "    <description>Demo project for Spring Boot</description>\n" +
-                        "    <properties>\n" +
-                        "        <java.version>11</java.version>\n" +
-                        "    </properties>\n" +
-                        "    <dependencies>\n" +
-                        "        <dependency>\n" +
-                        "            <groupId>org.springframework.boot</groupId>\n" +
-                        "            <artifactId>spring-boot-starter-data-jpa</artifactId>\n" +
-                        "            <version>2.4.5</version>\n" +
-                        "        </dependency>\n" +
-                        "        <dependency>\n" +
-                        "            <groupId>org.springframework.boot</groupId>\n" +
-                        "            <artifactId>spring-boot-starter-test</artifactId>\n" +
-                        "            <scope>test</scope>\n" +
-                        "            <version>2.5.3</version>\n" +
-                        "        </dependency>\n" +
-                        "    </dependencies>\n" +
-                        "</project>";
-
         String groupId = "org.springframework.boot";
         String artifactId = "spring-boot-starter-test";
+
+        Optional<String> optionalSpringBootVersion = getLatestBootReleaseVersion(groupId, artifactId);
+        assertThat(optionalSpringBootVersion).isPresent();
+
+        @Language("xml")
+        String expectedPomXml =
+                        """
+                        <?xml version="1.0" encoding="UTF-8"?>
+                        <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                            xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+                            <modelVersion>4.0.0</modelVersion>
+                            <groupId>com.example</groupId>
+                            <artifactId>boot-23-app</artifactId>
+                            <version>0.0.1-SNAPSHOT</version>
+                            <name>boot-23-app</name>
+                            <description>Demo project for Spring Boot</description>
+                            <properties>
+                                <java.version>11</java.version>
+                            </properties>
+                            <dependencies>
+                                <dependency>
+                                    <groupId>org.springframework.boot</groupId>
+                                    <artifactId>spring-boot-starter-data-jpa</artifactId>
+                                    <version>2.4.5</version>
+                                </dependency>
+                                <dependency>
+                                    <groupId>org.springframework.boot</groupId>
+                                    <artifactId>spring-boot-starter-test</artifactId>
+                                    <scope>test</scope>
+                                    <version>%s</version>
+                                </dependency>
+                            </dependencies>
+                        </project>
+                        """.formatted(optionalSpringBootVersion.get());
+
         String version = "latest.release";
-        UpgradeDependencyVersion sut = new UpgradeDependencyVersion(groupId, artifactId, version, null, false);
+        UpgradeDependencyVersion sut = new UpgradeDependencyVersion(groupId, artifactId, version, null, false, List.of());
 
         RecipeRun results = sut.run(mavens);
 
         assertThat(results.getResults().get(0).getAfter().printAll()).isEqualTo(expectedPomXml);
+    }
+
+    private Optional<String> getLatestBootReleaseVersion(String groupId, String artifactId) {
+        return DependencyVersionHelper.getLatestReleaseVersion(groupId, artifactId);
     }
 
     @Test
@@ -199,7 +213,7 @@ public class UpgradeDependencyVersionTest {
         String groupId = "org.springframework.boot";
         String artifactId = "spring-boot-starter-test";
         String version = null;
-        UpgradeDependencyVersion sut = new UpgradeDependencyVersion(groupId, artifactId, version, null, false);
+        UpgradeDependencyVersion sut = new UpgradeDependencyVersion(groupId, artifactId, version, null, false, List.of());
 
         AtomicBoolean exceptionThrown = new AtomicBoolean(false);
         RecipeRun results = sut.run(mavens, new InMemoryExecutionContext((e) -> {

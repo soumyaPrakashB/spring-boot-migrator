@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ public class RewriteMavenArtifactDownloader extends MavenArtifactDownloader {
                                 .readTimeout(2, TimeUnit.SECONDS)
                                 .build()
                 ),
-                (t) -> log.warn("Error while downloading dependencies", t)
+                (t) -> log.warn("Error while downloading dependencies: " + t.getMessage(), t)
         );
 
 //        super(new LocalMavenArtifactCache(Paths.get(System.getProperty("user.home"), ".m2", "repository")),

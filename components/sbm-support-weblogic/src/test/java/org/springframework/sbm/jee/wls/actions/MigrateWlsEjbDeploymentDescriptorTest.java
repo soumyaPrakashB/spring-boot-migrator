@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,7 +88,7 @@ class MigrateWlsEjbDeploymentDescriptorTest {
 
         ProjectContext projectContext = TestProjectContext.buildProjectContext()
                 .withJavaSources(javaSource)
-                .addProjectResource(Path.of("./src/main/resources/META-INF/weblogic-ejb-jar.xml"), wlsDeploymentDescriptor)
+                .withProjectResource(Path.of("./src/main/resources/META-INF/weblogic-ejb-jar.xml"), wlsDeploymentDescriptor)
                 .withMavenRootBuildFileSource(buildFileSource)
                 .addRegistrar(new JeeWlsEjbJarProjectResourceRegistrar())
                 .build();
@@ -138,7 +138,7 @@ class MigrateWlsEjbDeploymentDescriptorTest {
 
         ProjectContext projectContext = TestProjectContext.buildProjectContext()
                 .withJavaSources(javaSource)
-                .addProjectResource(Path.of("./src/main/resources/META-INF/weblogic-ejb-jar.xml"), wlsDeploymentDescriptor)
+                .withProjectResource(Path.of("./src/main/resources/META-INF/weblogic-ejb-jar.xml"), wlsDeploymentDescriptor)
                 .addRegistrar(new JeeWlsEjbJarProjectResourceRegistrar())
                 .withBuildFileHavingDependencies("javax.ejb:javax.ejb-api:3.2", "org.springframework:spring-tx:5.3.9")
                 .build();
@@ -183,7 +183,7 @@ class MigrateWlsEjbDeploymentDescriptorTest {
 
         ProjectContext projectContext = TestProjectContext.buildProjectContext()
                 .withJavaSources(javaSource)
-                .addProjectResource(Path.of("./src/main/resources/META-INF/weblogic-ejb-jar.xml"), wlsDeploymentDescriptor)
+                .withProjectResource(Path.of("./src/main/resources/META-INF/weblogic-ejb-jar.xml"), wlsDeploymentDescriptor)
                 .addRegistrar(new JeeWlsEjbJarProjectResourceRegistrar())
                 .withBuildFileHavingDependencies("javax.ejb:javax.ejb-api:3.2", "org.springframework:spring-tx:5.3.9")
                 .build();

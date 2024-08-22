@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ class BootHasAutoconfigurationConditionTest {
     void conditionTests(String filePath, String fileContent, boolean expectation) {
 
         ProjectContext context = TestProjectContext.buildProjectContext()
-                .addProjectResource(
+                .withProjectResource(
                         filePath,
                         fileContent
                 )
@@ -51,7 +51,7 @@ class BootHasAutoconfigurationConditionTest {
     @Test
     void itCanDoMultiLine() {
         ProjectContext context = TestProjectContext.buildProjectContext()
-                .addProjectResource(
+                .withProjectResource(
                         "src/main/resources/META-INF/spring.factories",
                         """
                                 org.springframework.boot.autoconfigure.EnableAutoConfiguration=XTZ\

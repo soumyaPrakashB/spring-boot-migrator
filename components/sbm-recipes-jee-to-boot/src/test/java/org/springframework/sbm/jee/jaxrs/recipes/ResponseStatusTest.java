@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.sbm.jee.jaxrs.recipes;
 import org.springframework.sbm.engine.recipe.AbstractAction;
 import org.springframework.sbm.engine.context.ProjectContext;
 import org.springframework.sbm.java.impl.RewriteJavaParser;
+import org.springframework.sbm.openrewrite.RewriteExecutionContext;
 import org.springframework.sbm.project.resource.SbmApplicationProperties;
 import org.springframework.sbm.project.resource.TestProjectContext;
 import org.springframework.sbm.testhelper.common.utils.TestDiff;
@@ -33,7 +34,8 @@ public class ResponseStatusTest {
             new AbstractAction() {
                 @Override
                 public void apply(ProjectContext context) {
-                    SwapStatusForHttpStatus r = new SwapStatusForHttpStatus(() -> new RewriteJavaParser(new SbmApplicationProperties()));
+                    SwapStatusForHttpStatus r = new SwapStatusForHttpStatus(() -> new RewriteJavaParser(new SbmApplicationProperties(),
+                                                                                                        new RewriteExecutionContext()));
                     context.getProjectJavaSources().apply(r);
                 }
             };

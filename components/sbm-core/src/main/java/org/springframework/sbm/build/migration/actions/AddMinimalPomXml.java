@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,15 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import lombok.Setter;
+import org.openrewrite.ExecutionContext;
 import org.openrewrite.Parser;
 import org.openrewrite.xml.tree.Xml;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.sbm.build.impl.MavenBuildFileRefactoringFactory;
 import org.springframework.sbm.build.impl.OpenRewriteMavenBuildFile;
 import org.springframework.sbm.build.impl.RewriteMavenParser;
 import org.springframework.sbm.engine.context.ProjectContext;
 import org.springframework.sbm.engine.recipe.AbstractAction;
-import org.springframework.sbm.openrewrite.RewriteExecutionContext;
 
 import java.io.ByteArrayInputStream;
 import java.io.StringWriter;
@@ -47,10 +48,17 @@ public class AddMinimalPomXml extends AbstractAction {
     @JsonIgnore
     private RewriteMavenParser rewriteMavenParser;
 
+    @Autowired
+    @JsonIgnore
+    private MavenBuildFileRefactoringFactory mavenBuildFileRefactoringFactory;
+
+    @Autowired
+    @JsonIgnore
+    private ExecutionContext executionContext;
+
     @Override
     public void apply(ProjectContext context) {
-        String projectDir = context.getProjectRootDirectory().toString();
-        String projectName = projectDir.replace(" ", "-").substring(projectDir.lastIndexOf("/") + 1);
+        String projectName = context.getProjectRootDirectory().getFileName().toString();
         Map<String, String> params = new HashMap<>();
         params.put("groupId", "com.example.change");
         params.put("artifactId", projectName);
@@ -67,11 +75,11 @@ public class AddMinimalPomXml extends AbstractAction {
         String src = writer.toString();
         Parser.Input input = new Parser.Input(Path.of("pom.xml"), () -> new ByteArrayInputStream(src.getBytes(StandardCharsets.UTF_8)));
         Xml.Document maven = rewriteMavenParser
-                .parseInputs(List.of(input), null, new RewriteExecutionContext(getEventPublisher())).get(0);
+                .parseInputs(List.of(input), null, executionContext).get(0);
         OpenRewriteMavenBuildFile rewriteMavenBuildFile = new OpenRewriteMavenBuildFile(
                 context.getProjectRootDirectory(),
-                maven, getEventPublisher(), new RewriteExecutionContext(getEventPublisher())
-        );
+                maven, getEventPublisher(), executionContext,
+                mavenBuildFileRefactoringFactory.createRefactoring());
         context.getProjectResources().add(rewriteMavenBuildFile);
     }
 }

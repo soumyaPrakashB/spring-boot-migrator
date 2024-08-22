@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ import java.util.stream.Collectors;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Base class to be extended by integrationTests.
@@ -117,8 +117,7 @@ public abstract class IntegrationTestBaseClass {
         }
 
         if (mvnHome == null) {
-            System.err.println("You must set $MAVEN_HOME on your system for the integration test to run.");
-            throw new RuntimeException();
+            throw new RuntimeException("You must set $MAVEN_HOME on your system for the integration test to run.");
         }
 
         System.setProperty("maven.home", mvnHome);
@@ -178,23 +177,23 @@ public abstract class IntegrationTestBaseClass {
      * @param applicableRecipes
      */
     protected void assertApplicableRecipesContain(String... applicableRecipes) {
-        List<String> recipeNames = getRecipeNames();
+        List<String> recipeNames = getApplicableRecipeNames();
         assertThat(recipeNames).contains(applicableRecipes);
     }
 
     @NotNull
-    private List<String> getRecipeNames() {
+    protected List<String> getApplicableRecipeNames() {
         return applicableRecipeListCommand.execute(projectContextHolder.getProjectContext()).stream()
                 .map(r -> r.getName()).collect(Collectors.toList());
     }
 
     protected void assertRecipeApplicable(String recipeName) {
-        List<String> recipeNames = getRecipeNames();
+        List<String> recipeNames = getApplicableRecipeNames();
         assertThat(recipeNames).contains(recipeName);
     }
 
     protected void assertRecipeNotApplicable(String recipeName) {
-        List<String> recipeNames = getRecipeNames();
+        List<String> recipeNames = getApplicableRecipeNames();
         assertThat(recipeNames).doesNotContain(recipeName);
     }
 
@@ -236,16 +235,16 @@ public abstract class IntegrationTestBaseClass {
                 CommandLineException executionException = invocationResult.getExecutionException();
                 int exitCode = invocationResult.getExitCode();
                 if (executionException != null) {
-                    Assert.fail("Maven build 'mvn " + g
+                    fail("Maven build 'mvn " + g
                             + " " + pomXml + " "
                             + "' failed with Exception: " + executionException.getMessage());
                 }
                 if (exitCode != 0) {
-                    Assert.fail("Maven build 'mvn " + g
+                    fail("Maven build 'mvn " + g
                             + "' failed with exitCode: " + exitCode);
                 }
             } catch (MavenInvocationException e) {
-                Assert.fail("Maven build 'mvn " + g
+                fail("Maven build 'mvn " + g
                         + " " + pomXml + " "
                         + "' failed with Exception: " + e.getMessage());
                 e.printStackTrace();

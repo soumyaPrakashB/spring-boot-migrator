@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,7 +91,7 @@ public class AddSpringBootContextTestClassTest {
 
             assertThat(context.getProjectJavaSources().list()).hasSize(3);
             assertThat(context.getProjectJavaSources().list().get(2).getPackageName()).isEqualTo("org.springframework.sbm.root.test");
-            assertThat(context.getProjectJavaSources().list().get(2).print()).isEqualTo(expectedTestClassSource);
+            assertThat(context.getProjectJavaSources().list().get(2).print()).isEqualToNormalizingNewlines(expectedTestClassSource);
         }
     }
 
@@ -161,11 +161,11 @@ public class AddSpringBootContextTestClassTest {
             sbmApplicationProperties.setDefaultBasePackage("com.example.sbm");
 
             ProjectContext projectContext = TestProjectContext.buildProjectContext()
-                    .addProjectResource("pom.xml", parentPom)
+                    .withProjectResource("pom.xml", parentPom)
                     .withApplicationProperties(sbmApplicationProperties)
-                    .addProjectResource("module1/pom.xml", childPom1)
-                    .addProjectResource("module2/pom.xml", childPom2)
-                    .addJavaSourceToModule("module1/src/main/java", javaClass1)
+                    .withProjectResource("module1/pom.xml", childPom1)
+                    .withProjectResource("module2/pom.xml", childPom2)
+                    .withJavaSourceInModule("module1/src/main/java", javaClass1)
                     .build();
 
             sut.setSbmApplicationProperties(sbmApplicationProperties);

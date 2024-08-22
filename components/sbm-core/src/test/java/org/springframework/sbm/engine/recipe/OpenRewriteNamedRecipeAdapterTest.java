@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.sbm.engine.recipe;
 
 import org.junit.jupiter.api.Test;
@@ -21,27 +20,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.sbm.engine.context.ProjectContext;
-import org.springframework.sbm.project.RewriteSourceFileWrapper;
-import org.springframework.sbm.project.resource.ResourceHelper;
-import org.springframework.sbm.project.resource.TestProjectContext;
-import org.springframework.validation.beanvalidation.CustomValidatorBean;
 
-import java.io.IOException;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class OpenRewriteNamedRecipeAdapterTest {
     @Mock
     RewriteRecipeLoader rewriteRecipeLoader;
-
-    @Mock
-    RewriteRecipeRunner rewriteRecipeRunner;
 
     @InjectMocks
     OpenRewriteNamedRecipeAdapter sut;
@@ -57,7 +43,7 @@ public class OpenRewriteNamedRecipeAdapterTest {
 
         sut.apply(context);
 
-        verify(rewriteRecipeRunner).run(context, recipe);
+        verify(context).apply(recipe);
     }
 
 }

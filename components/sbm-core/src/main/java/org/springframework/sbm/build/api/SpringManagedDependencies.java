@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,11 @@
  */
 package org.springframework.sbm.build.api;
 
+import org.openrewrite.ExecutionContext;
+import org.openrewrite.maven.MavenDownloadingException;
 import org.openrewrite.maven.internal.MavenPomDownloader;
 import org.openrewrite.maven.tree.GroupArtifactVersion;
 import org.openrewrite.maven.tree.MavenRepository;
-import org.springframework.sbm.openrewrite.RewriteExecutionContext;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -32,24 +33,28 @@ import java.util.stream.Stream;
 public class SpringManagedDependencies {
 
     private static List<MavenRepository> SPRING_REPOSITORIES = List.of(
-        new MavenRepository("spring-release", "https://repo.spring.io/release", true, false, null, null)
+        new MavenRepository("spring-release", "https://repo.spring.io/release", "true", "false", true, null, null, null)
     );
 
     private List<org.openrewrite.maven.tree.Dependency> dependencies;
     private static Map<GroupArtifactVersion, SpringManagedDependencies> INSTANCES = new HashMap<>();
 
-    public static SpringManagedDependencies by(String groupId, String artifact, String version){
+    public static SpringManagedDependencies by(String groupId, String artifact, String version, ExecutionContext executionContext){
         final GroupArtifactVersion groupArtifactVersion =
                 new GroupArtifactVersion(groupId, artifact, version);
 
-        INSTANCES.computeIfAbsent(groupArtifactVersion, SpringManagedDependencies::new);
+        INSTANCES.computeIfAbsent(groupArtifactVersion, gav ->  new SpringManagedDependencies(gav, executionContext));
         return INSTANCES.get(groupArtifactVersion);
     }
 
-    private SpringManagedDependencies(GroupArtifactVersion groupArtifactVersion){
-        dependencies = new MavenPomDownloader(Collections.emptyMap(), new RewriteExecutionContext())
-                .download(groupArtifactVersion, null, null, SPRING_REPOSITORIES)
-                .getDependencies();
+    private SpringManagedDependencies(GroupArtifactVersion groupArtifactVersion, ExecutionContext executionContext){
+        try {
+            dependencies = new MavenPomDownloader(Collections.emptyMap(), executionContext)
+                    .download(groupArtifactVersion, null, null, SPRING_REPOSITORIES)
+                    .getDependencies();
+        } catch (MavenDownloadingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public Stream<Dependency> stream(){

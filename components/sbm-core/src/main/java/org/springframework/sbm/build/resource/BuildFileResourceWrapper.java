@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,14 @@
 package org.springframework.sbm.build.resource;
 
 import lombok.RequiredArgsConstructor;
+import org.openrewrite.ExecutionContext;
 import org.openrewrite.SourceFile;
-import org.openrewrite.java.JavaParser;
 import org.openrewrite.xml.tree.Xml;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.annotation.Order;
+import org.springframework.sbm.build.impl.MavenBuildFileRefactoring;
+import org.springframework.sbm.build.impl.MavenBuildFileRefactoringFactory;
 import org.springframework.sbm.build.impl.OpenRewriteMavenBuildFile;
-import org.springframework.sbm.openrewrite.RewriteExecutionContext;
 import org.springframework.sbm.project.resource.ProjectResourceWrapper;
 import org.springframework.sbm.project.resource.RewriteSourceFileHolder;
 import org.springframework.stereotype.Component;
@@ -34,6 +35,9 @@ public class BuildFileResourceWrapper implements ProjectResourceWrapper<OpenRewr
 
     private final ApplicationEventPublisher eventPublisher;
 
+    private final MavenBuildFileRefactoringFactory mavenBuildFileRefactoringFactory;
+    private final ExecutionContext executionContext;
+
     @Override
     public boolean shouldHandle(RewriteSourceFileHolder<? extends SourceFile> rewriteSourceFileHolder) {
         return Xml.Document.class.isAssignableFrom(rewriteSourceFileHolder.getSourceFile().getClass()) && rewriteSourceFileHolder.getAbsolutePath().endsWith("pom.xml");
@@ -42,11 +46,13 @@ public class BuildFileResourceWrapper implements ProjectResourceWrapper<OpenRewr
     @Override
     public OpenRewriteMavenBuildFile wrapRewriteSourceFileHolder(RewriteSourceFileHolder<? extends SourceFile> rewriteSourceFileHolder) {
         Xml.Document maven = (Xml.Document) rewriteSourceFileHolder.getSourceFile();
-
+        MavenBuildFileRefactoring refactoring = mavenBuildFileRefactoringFactory.createRefactoring();
         return new OpenRewriteMavenBuildFile(
                 rewriteSourceFileHolder.getAbsoluteProjectDir(),
-                maven, eventPublisher,
-                new RewriteExecutionContext(eventPublisher)
+                maven,
+                eventPublisher,
+                executionContext,
+                refactoring
         );
     }
 

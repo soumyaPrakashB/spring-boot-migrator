@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.sbm.build.api;
 
 import org.intellij.lang.annotations.Language;
@@ -27,6 +26,7 @@ import org.springframework.sbm.project.resource.ProjectResourceSet;
 import org.springframework.sbm.project.resource.RewriteSourceFileHolder;
 import org.springframework.sbm.project.resource.TestProjectContext;
 import org.springframework.sbm.project.resource.filter.ProjectResourceFinder;
+import org.springframework.sbm.utils.LinuxWindowsPathUnifier;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -66,7 +66,6 @@ public class Module_searchTestJava_Test {
 
             ProjectContext context = builder.build();
 
-            AtomicBoolean wasCalled = new AtomicBoolean(false);
             verifySearchTest(context, projectResourceSet -> {
                 assertThat(projectResourceSet.list()).isEmpty();
             }, "");
@@ -79,12 +78,12 @@ public class Module_searchTestJava_Test {
             ProjectContext context = TestProjectContext
                     .buildProjectContext()
                     .withMavenBuildFileSource("pom.xml", singlePom)
-                    .addJavaSource("src/test/java", "public class SomeClass{}")
+                    .withJavaSource("src/test/java", "public class SomeClass{}")
                     .build();
 
             verifySearchTest(context, projectResourceSet -> {
                 assertThat(projectResourceSet.list()).hasSize(1);
-                assertThat(projectResourceSet.get(0).getSourcePath().toString()).isEqualTo("src/test/java/SomeClass.java");
+                assertThat(LinuxWindowsPathUnifier.unifyPath(projectResourceSet.get(0).getSourcePath())).isEqualTo("src/test/java/SomeClass.java");
                 assertThat(projectResourceSet.get(0).print()).isEqualTo("public class SomeClass{}");
             }, "");
         }
@@ -93,13 +92,13 @@ public class Module_searchTestJava_Test {
         @DisplayName("with classes in src/main/java and src/test/java provides ProjectResourceSet with classes from src/test/java")
         void withClassesInTestAndMain_providesClassesFromTest() {
             ProjectContext context = builder
-                    .addJavaSource("src/main/java", "public class SomeClass{}")
-                    .addJavaSource("src/test/java", "public class SomeClassTest{}")
+                    .withJavaSource("src/main/java", "public class SomeClass{}")
+                    .withJavaSource("src/test/java", "public class SomeClassTest{}")
                     .build();
 
             verifySearchTest(context, projectResourceSet -> {
                 assertThat(projectResourceSet.list()).hasSize(1);
-                assertThat(projectResourceSet.get(0).getSourcePath().toString()).isEqualTo("src/test/java/SomeClassTest.java");
+                assertThat(LinuxWindowsPathUnifier.unifyPath(projectResourceSet.get(0).getSourcePath())).isEqualTo("src/test/java/SomeClassTest.java");
                 assertThat(projectResourceSet.get(0).print()).isEqualTo("public class SomeClassTest{}");
             }, "");
         }
@@ -109,7 +108,7 @@ public class Module_searchTestJava_Test {
         void withClassesInSrcMainJava_providesEmptyProjectResources() {
 
             ProjectContext context = builder
-                    .addProjectResource("src/main/java/SomeClass.java", "public class SomeClass{}")
+                    .withProjectResource("src/main/java/SomeClass.java", "public class SomeClass{}")
                     .build();
 
             verifySearchTest(context, projectResourceSet -> assertThat(projectResourceSet.list()).isEmpty(), "");
@@ -188,7 +187,6 @@ public class Module_searchTestJava_Test {
                     .withMavenBuildFileSource("component/pom.xml", componentPom);
         }
 
-
         @Test
         @DisplayName("with no classes provides empty ProjectResourceSet to search method")
         void withNoClasses_providesEmptyProjectResources() {
@@ -202,7 +200,7 @@ public class Module_searchTestJava_Test {
         void withClassesInOtherModules_providesEmptyProjectResources() {
 
             ProjectContext context = builder
-                    .addJavaSource("component/src/test/java", "public class SomeClass{}")
+                    .withJavaSource("component/src/test/java", "public class SomeClass{}")
                     .build();
 
             verifySearchTest(context, (projectResourceSet) -> assertThat(projectResourceSet.list()).isEmpty(),
@@ -214,14 +212,14 @@ public class Module_searchTestJava_Test {
         void withResourcesInMainAndTest_providesProjectResourcesFromSrcMainResources() {
 
             ProjectContext context = builder
-                    .addJavaSource("application/src/main/java", "public class SomeClass{}")
-                    .addJavaSource("application/src/test/java", "public class SomeClassTest{}")
+                    .withJavaSource("application/src/main/java", "public class SomeClass{}")
+                    .withJavaSource("application/src/test/java", "public class SomeClassTest{}")
                     .build();
 
             verifySearchTest(context,
                              (projectResourceSet) -> {
                                 assertThat(projectResourceSet.list()).hasSize(1);
-                                assertThat(projectResourceSet.list().get(0).getSourcePath().toString()).isEqualTo("application/src/test/java/SomeClassTest.java");
+                                assertThat(LinuxWindowsPathUnifier.unifyPath(projectResourceSet.list().get(0).getSourcePath())).isEqualTo("application/src/test/java/SomeClassTest.java");
                                 assertThat(projectResourceSet.list().get(0).print()).isEqualTo("public class SomeClassTest{}");
                             },
                             "application");
@@ -232,13 +230,13 @@ public class Module_searchTestJava_Test {
         void withClassesInTest_providesClassesFromSrcTestJava() {
 
             ProjectContext context = builder
-                    .addJavaSource("application/src/test/java", "public class SomeClassTest{}")
+                    .withJavaSource("application/src/test/java", "public class SomeClassTest{}")
                     .build();
 
             verifySearchTest(context,
                              projectResourceSet -> {
                                 assertThat(projectResourceSet.list()).hasSize(1);
-                                assertThat(projectResourceSet.list().get(0).getSourcePath().toString()).isEqualTo(
+                                assertThat(LinuxWindowsPathUnifier.unifyPath(projectResourceSet.list().get(0).getSourcePath())).isEqualTo(
                                         "application/src/test/java/SomeClassTest.java");
                                 assertThat(projectResourceSet.list().get(0).print()).isEqualTo("public class SomeClassTest{}");
                             },

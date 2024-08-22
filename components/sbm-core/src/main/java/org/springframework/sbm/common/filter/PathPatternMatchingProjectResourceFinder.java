@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,8 +44,8 @@ public class PathPatternMatchingProjectResourceFinder implements ProjectResource
     }
 
     private void validateMatchingPatterns(List<String> matchingPatterns) {
-        for(String pattern : matchingPatterns) {
-            if( ! matcher.isPattern(pattern)) {
+        for (String pattern : matchingPatterns) {
+            if (!matcher.isPattern(pattern)) {
                 throw new RuntimeException("The provided pattern '"+pattern+"' is invalid. Please check AntPathMatcher javadoc for examples of valid patterns.");
             }
         }

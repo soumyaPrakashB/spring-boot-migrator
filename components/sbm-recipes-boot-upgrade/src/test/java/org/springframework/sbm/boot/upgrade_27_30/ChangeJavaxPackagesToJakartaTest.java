@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.sbm.boot.upgrade_27_30;
 
 import org.junit.jupiter.api.Test;
@@ -62,10 +61,10 @@ public class ChangeJavaxPackagesToJakartaTest {
                 "}";
         ProjectContext context = TestProjectContext.buildProjectContext()
                 .withBuildFileHavingDependencies("javax.money:money-api:1.1")
-                .addJavaSource("src/main/java", javaClass1)
-                .addJavaSource("src/main/java", javaClass2)
-                .addJavaSource("src/main/java", javaClass3)
-                .addJavaSource("src/main/java", javaClass4)
+                .withJavaSource("src/main/java", javaClass1)
+                .withJavaSource("src/main/java", javaClass2)
+                .withJavaSource("src/main/java", javaClass3)
+                .withJavaSource("src/main/java", javaClass4)
                 .build();
 
         List<JavaSource> matches = context.getProjectJavaSources().asStream()
@@ -73,8 +72,8 @@ public class ChangeJavaxPackagesToJakartaTest {
                 .collect(Collectors.toList());
 
         assertThat(matches).hasSize(2);
-        assertThat(matches.get(0).getSourcePath().toString()).isEqualTo("src/main/java/com/example/SomeClass.java");
-        assertThat(matches.get(1).getSourcePath().toString()).isEqualTo("src/main/java/com/example/SomeClass2.java");
+        assertThat(matches.get(0).getSourcePathString()).isEqualTo("src/main/java/com/example/SomeClass.java");
+        assertThat(matches.get(1).getSourcePathString()).isEqualTo("src/main/java/com/example/SomeClass2.java");
         matches.forEach(m -> System.out.println(m.getSourcePath()));
 
     }
@@ -103,8 +102,8 @@ public class ChangeJavaxPackagesToJakartaTest {
 
         ProjectContext context = TestProjectContext.buildProjectContext()
                 .withBuildFileHavingDependencies(/*"javax.money:money-api:1.1", */"jakarta.persistence:jakarta.persistence-api:2.2.3")
-                .addJavaSource("src/main/java/com/example/SomeClass.java", javaClass1)
-                .addJavaSource("src/main/java/com/example/SomeClass2.java", javaClass2)
+                .withJavaSource("src/main/java/com/example/SomeClass.java", javaClass1)
+                .withJavaSource("src/main/java/com/example/SomeClass2.java", javaClass2)
                 .build();
 
 //        context.getProjectJavaSources().apply(new ChangePackage("javax", "jakarta", true));

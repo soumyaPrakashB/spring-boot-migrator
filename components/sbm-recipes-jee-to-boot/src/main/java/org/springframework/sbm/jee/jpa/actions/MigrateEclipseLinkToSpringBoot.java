@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -289,7 +289,7 @@ public class MigrateEclipseLinkToSpringBoot extends AbstractAction {
     private List<SpringBootJpaProperty> extractEclipseLinkProperties(Module module) {
         List<SpringBootJpaProperty> springBootJpaProperties = new ArrayList<>();
 
-        Optional<PersistenceXml> optPersistenceXml = module.search(new PersistenceXmlResourceFilter());
+        Optional<PersistenceXml> optPersistenceXml = module.search(new PersistenceXmlResourceFilter("**/src/main/resources/**"));
         return optPersistenceXml.map(persistenceXml -> persistenceXml.getPersistence().getPersistenceUnit().get(0) // FIXME: should multiple persistence-units be handled or fail?
             .getProperties())
             .filter(not(properties -> properties.getProperty().isEmpty()))
@@ -317,7 +317,8 @@ public class MigrateEclipseLinkToSpringBoot extends AbstractAction {
             params.put("eclipseLinkProperties", eclipseLinkProperties);
             Template template = configuration.getTemplate("eclipselink-configuration-class.ftl");
             template.process(params, writer);
-            return writer.toString();
+            String out = writer.toString();
+            return out;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

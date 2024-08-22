@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,13 +28,12 @@ public class PreconditionVerificationRenderer {
 
     public String renderPreconditionCheckResults(PreconditionVerificationResult result) {
         AttributedStringBuilder stringBuilder = new AttributedStringBuilder();
-        stringBuilder.style(stringBuilder.style().DEFAULT.bold().foreground(Colors.rgbColor("black")));
+        stringBuilder.style(stringBuilder.style().DEFAULT.bold());
         stringBuilder.append("\n\n").append(String.format("Checked preconditions for '%s'", result.getProjectRoot())).append("\n");
 
-        result.getResults().forEach(r -> {
-            stringBuilder.append(renderCheckResult(r));
-        });
+        result.getResults().forEach(r -> stringBuilder.append(renderCheckResult(r)));
         stringBuilder.append("\n");
+
         return stringBuilder.toAnsi();
     }
 
@@ -42,19 +41,19 @@ public class PreconditionVerificationRenderer {
         AttributedStringBuilder builder = new AttributedStringBuilder();
 
         // TODO: move rendering of status into central place
-        if(r.getState().equals(PreconditionCheck.ResultState.FAILED)) {
+        if (r.getState().equals(PreconditionCheck.ResultState.FAILED)) {
             builder.style(builder.style().DEFAULT.bold().foreground(Colors.rgbColor("red")));
             builder.append(" [X]");
             builder.style(builder.style().DEFAULT);
         }
 
-        if(r.getState().equals(PreconditionCheck.ResultState.PASSED)) {
+        if (r.getState().equals(PreconditionCheck.ResultState.PASSED)) {
             builder.style(AttributedStyle.DEFAULT.bold().foreground(Colors.rgbColor("green")));
             builder.append("[ok]");
             builder.style(AttributedStyle.DEFAULT);
         }
 
-        if(r.getState().equals(PreconditionCheck.ResultState.WARN)) {
+        if (r.getState().equals(PreconditionCheck.ResultState.WARN)) {
             builder.style(AttributedStyle.DEFAULT.bold().foreground(Colors.rgbColor("yellow")));
             builder.append(" [!]");
             builder.style(AttributedStyle.DEFAULT);
