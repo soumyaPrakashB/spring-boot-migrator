@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import org.springframework.sbm.engine.context.ProjectContext;
 import org.springframework.sbm.engine.context.ProjectContextFactory;
 import org.springframework.sbm.engine.git.Commit;
 import org.springframework.sbm.engine.git.GitSupport;
-import org.springframework.sbm.openrewrite.RewriteExecutionContext;
 import org.springframework.sbm.project.RewriteSourceFileWrapper;
 import org.springframework.sbm.project.resource.ProjectResourceSet;
 import org.springframework.sbm.project.resource.RewriteSourceFileHolder;
@@ -45,7 +44,7 @@ public class ProjectContextInitializer {
 
     private final RewriteSourceFileWrapper rewriteSourceFileWrapper;
 
-    public ProjectContext initProjectContext(Path projectDir, List<Resource> resources, RewriteExecutionContext rewriteExecutionContext) {
+    public ProjectContext initProjectContext(Path projectDir, List<Resource> resources) {
         final Path absoluteProjectDir = projectDir.toAbsolutePath().normalize();
         // TODO: remove git initialization, handled by precondition check
         initializeGitRepoIfNoneExists(absoluteProjectDir);

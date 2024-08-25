@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package org.springframework.sbm.java;
 
+import org.openrewrite.ExecutionContext;
 import org.openrewrite.java.JavaParser;
 import org.springframework.sbm.java.impl.OpenRewriteJavaSource;
 import org.springframework.sbm.java.refactoring.JavaRefactoring;
@@ -33,6 +34,8 @@ public class JavaSourceProjectResourceWrapper implements ProjectResourceWrapper<
     private final JavaRefactoringFactory javaRefactoringFactory;
     private final JavaParser javaParser;
 
+    private final ExecutionContext executionContext;
+
     @Override
     public boolean shouldHandle(RewriteSourceFileHolder<? extends SourceFile> rewriteSourceFileHolder) {
         return J.CompilationUnit.class.isAssignableFrom(rewriteSourceFileHolder.getSourceFile().getClass());
@@ -42,6 +45,6 @@ public class JavaSourceProjectResourceWrapper implements ProjectResourceWrapper<
     public OpenRewriteJavaSource wrapRewriteSourceFileHolder(RewriteSourceFileHolder<? extends SourceFile> rewriteSourceFileHolder) {
         J.CompilationUnit compilationUnit = J.CompilationUnit.class.cast(rewriteSourceFileHolder.getSourceFile());
         JavaRefactoring refactoring = javaRefactoringFactory.createRefactoring(compilationUnit);
-        return new OpenRewriteJavaSource(rewriteSourceFileHolder.getAbsoluteProjectDir(), compilationUnit, refactoring, javaParser);
+        return new OpenRewriteJavaSource(rewriteSourceFileHolder.getAbsoluteProjectDir(), compilationUnit, refactoring, javaParser, executionContext);
     }
 }

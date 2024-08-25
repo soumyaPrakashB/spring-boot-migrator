@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.springframework.sbm.mule.resource;
 
 import org.springframework.sbm.engine.context.ProjectContext;
+import org.springframework.sbm.openrewrite.RewriteExecutionContext;
 import org.springframework.sbm.project.resource.TestProjectContext;
 import org.junit.jupiter.api.Test;
 
@@ -48,8 +49,8 @@ class MuleXmlProjectResourceRegistrarTest {
 
 
         ProjectContext projectContext = TestProjectContext.buildProjectContext()
-                .addProjectResource("src/main/mule/mule-def.xml", xml)
-                .addRegistrar(new MuleXmlProjectResourceRegistrar())
+                .withProjectResource("src/main/mule/mule-def.xml", xml)
+                .addRegistrar(new MuleXmlProjectResourceRegistrar(new RewriteExecutionContext()))
                 .build();
 
         List<MuleXml> muleXmls = projectContext.search(new MuleXmlProjectResourceFilter());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,12 @@ import org.springframework.sbm.project.resource.ProjectResourceSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class XmlSpringBeanConfigurationFilter implements ProjectResourceFinder<List<RewriteSourceFileHolder>> {
+public class XmlSpringBeanConfigurationFilter implements ProjectResourceFinder<List<RewriteSourceFileHolder<?>>> {
 
     private static final String SCHEMA_STRING = "www.springframework.org/schema/beans";
 
     @Override
-    public List<RewriteSourceFileHolder> apply(ProjectResourceSet projectResourceSet) {
+    public List<RewriteSourceFileHolder<?>> apply(ProjectResourceSet projectResourceSet) {
         return projectResourceSet.stream()
                 .filter(r ->
                             r.getAbsolutePath().toString().endsWith(".xml") &&

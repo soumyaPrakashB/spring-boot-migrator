@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,8 +50,8 @@ class MoveFilesActionTest {
 
         ProjectContext projectContext = TestProjectContext.buildProjectContext()
                 .withProjectRoot(projectRoot)
-                .addProjectResource(someFilePath, fileContent1)
-                .addProjectResource(anotherFilePath, fileContent2)
+                .withProjectResource(someFilePath, fileContent1)
+                .withProjectResource(anotherFilePath, fileContent2)
                 .build();
 
         ProjectResource someFile = projectContext.search(new PathPatternMatchingProjectResourceFinder("/**/SomeFile.foo")).get(0);
@@ -79,10 +79,10 @@ class MoveFilesActionTest {
         assertThat(newResource.print()).isEqualTo(resource.print());
     }
 
-    private void verifyPrecondition(ProjectResource resourceToMove1, Path absolutePath, String fileContent1) {
-        assertThat(resourceToMove1.print()).isEqualTo(fileContent1);
-        assertThat(resourceToMove1.isDeleted()).isFalse();
-        assertThat(resourceToMove1.getAbsolutePath()).isEqualTo(absolutePath);
+    private void verifyPrecondition(ProjectResource resourceToMove, Path absolutePath, String fileContent) {
+        assertThat(resourceToMove.print()).isEqualTo(fileContent);
+        assertThat(resourceToMove.isDeleted()).isFalse();
+        assertThat(resourceToMove.getAbsolutePath()).isEqualTo(absolutePath);
     }
 
 }

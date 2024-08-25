@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import org.springframework.sbm.project.resource.ProjectResource;
 
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -87,7 +86,9 @@ public interface BuildFile extends ProjectResource {
 
     void removeDependenciesInner(List<Dependency> dependencies);
 
-    List<Dependency> getDependencyManagement();
+    List<Dependency> getEffectiveDependencyManagement();
+
+    List<Dependency> getRequestedDependencyManagement();
 
     List<Dependency> getRequestedManagedDependencies();
 
@@ -115,6 +116,9 @@ public interface BuildFile extends ProjectResource {
 
     Path getMainResourceFolder();
 
+    /**
+     * Sets existing property or adds new property.
+     */
     void setProperty(String key, String value);
 
     String getProperty(String key);

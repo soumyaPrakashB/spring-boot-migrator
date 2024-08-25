@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,8 @@ class XmlFileContainingTest {
         String someText = "I am the text...";
 
         ProjectContext projectContext = TestProjectContext.buildProjectContext()
-                .addProjectResource("src/main/resources/to/xmlFile.xml", xmlFile1)
-                .addProjectResource("src/main/resources/path/to/sometextFile.txt", someText)
+                .withProjectResource("src/main/resources/to/xmlFile.xml", xmlFile1)
+                .withProjectResource("src/main/resources/path/to/sometextFile.txt", someText)
                 .build();
 
         XmlFileContaining sut = new XmlFileContaining();
@@ -48,7 +48,7 @@ class XmlFileContainingTest {
         String someText = "I am the text...";
 
         ProjectContext projectContext = TestProjectContext.buildProjectContext()
-                .addProjectResource("abosolute/path/to/sometextFile.txt", someText)
+                .withProjectResource("abosolute/path/to/sometextFile.txt", someText)
                 .build();
 
         XmlFileContaining sut = new XmlFileContaining();
@@ -64,8 +64,8 @@ class XmlFileContainingTest {
         String someText = "I am the text...";
 
         ProjectContext projectContext = TestProjectContext.buildProjectContext()
-                .addProjectResource("src/main/resources/path/to/xmlFile.xml", xmlFile1)
-                .addProjectResource("src/main/resources/path/to/sometextFile.txt", someText)
+                .withProjectResource("src/main/resources/path/to/xmlFile.xml", xmlFile1)
+                .withProjectResource("src/main/resources/path/to/sometextFile.txt", someText)
                 .build();
 
         assertThat(projectContext.getProjectResources().list()).hasSize(3); // pom.xml was also added

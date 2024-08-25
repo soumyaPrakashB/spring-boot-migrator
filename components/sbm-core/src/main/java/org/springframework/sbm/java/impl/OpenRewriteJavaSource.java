@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,17 +33,20 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 public class OpenRewriteJavaSource extends RewriteSourceFileHolder<J.CompilationUnit> implements JavaSource {
 
     private final JavaRefactoring refactoring;
     private final JavaParser javaParser;
+    private ExecutionContext executionContext;
 
-    public OpenRewriteJavaSource(Path absoluteProjectPath, J.CompilationUnit compilationUnit, JavaRefactoring refactoring, JavaParser javaParser) {
+    public OpenRewriteJavaSource(Path absoluteProjectPath, J.CompilationUnit compilationUnit, JavaRefactoring refactoring, JavaParser javaParser, ExecutionContext executionContext) {
         super(absoluteProjectPath, compilationUnit);
         this.refactoring = refactoring;
         this.javaParser = javaParser;
+        this.executionContext = executionContext;
     }
 
     @Deprecated
@@ -63,7 +66,7 @@ public class OpenRewriteJavaSource extends RewriteSourceFileHolder<J.Compilation
     @Override
     public List<OpenRewriteType> getTypes() {
         return getCompilationUnit().getClasses().stream()
-                .map(cd -> new OpenRewriteType(cd, getResource(), refactoring, javaParser))
+                .map(cd -> new OpenRewriteType(cd, getResource(), refactoring, executionContext, javaParser))
                 .collect(Collectors.toList());
     }
 
@@ -135,13 +138,14 @@ public class OpenRewriteJavaSource extends RewriteSourceFileHolder<J.Compilation
 
     /**
      * Searches in the source file for the usage of the given annotation.
+     * Meta annotations are found.
      */
     @Override
     public boolean hasAnnotation(String annotation) {
         if (!annotation.startsWith("@")) {
             annotation = "@" + annotation;
         }
-        FindAnnotations findAnnotation = new FindAnnotations(annotation);
+        FindAnnotations findAnnotation = new FindAnnotations(annotation, true);
         List<Result> results = findAnnotation.run(List.of(getCompilationUnit())).getResults();
         return !results.isEmpty();
     }
@@ -201,7 +205,24 @@ public class OpenRewriteJavaSource extends RewriteSourceFileHolder<J.Compilation
             }
         };
 
-        PrintOutputCapture<Integer> outputCapture = new PrintOutputCapture(new InMemoryExecutionContext());
+
+        // Don't print markers here, now that markers are kept in the underlying SourceFiles
+        PrintOutputCapture<Integer> outputCapture = new PrintOutputCapture(executionContext, new PrintOutputCapture.MarkerPrinter() {
+            @Override
+            public String beforePrefix(Marker marker, Cursor cursor, UnaryOperator<String> commentWrapper) {
+                return "";
+            }
+
+            @Override
+            public String beforeSyntax(Marker marker, Cursor cursor, UnaryOperator<String> commentWrapper) {
+                return "";
+            }
+
+            @Override
+            public String afterSyntax(Marker marker, Cursor cursor, UnaryOperator<String> commentWrapper) {
+                return "";
+            }
+        });
         ((JavaPrinter) javaPrinter).visit(getSourceFile(), outputCapture);
 
         return outputCapture.out.toString();

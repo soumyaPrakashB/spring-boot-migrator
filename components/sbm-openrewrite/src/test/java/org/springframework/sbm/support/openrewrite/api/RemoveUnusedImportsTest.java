@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@ package org.springframework.sbm.support.openrewrite.api;
 
 import org.openrewrite.RecipeRun;
 import org.springframework.sbm.java.OpenRewriteTestSupport;
-import org.springframework.sbm.support.openrewrite.java.MavenPomDownloaderTest;
 import org.junit.jupiter.api.Test;
 import org.openrewrite.java.RemoveUnusedImports;
 import org.openrewrite.java.tree.J;
@@ -29,7 +28,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class RemoveUnusedImportsTest {
     @Test
     void removeUnusedImports() {
-        MavenPomDownloaderTest mavenPomDownloaderTest;
         String javaCode =
                 "import org.springframework.transaction.annotation.Propagation;\n" +
                         "import org.springframework.transaction.annotation.Transactional;\n" +

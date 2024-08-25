@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.sbm.project.parser;
 
 import org.jetbrains.annotations.NotNull;
@@ -64,7 +63,7 @@ class JavaProvenanceMarkerFactoryTest {
                 "</project>";
 
         Path projectDirectory = Path.of("./faked-project-dir/pom.xml");
-        Xml.Document maven = new RewriteMavenParser(new MavenSettingsInitializer()).parse(pomXmlSource).get(0).withSourcePath(Path.of("pom.xml"));
+        Xml.Document maven = new RewriteMavenParser(new MavenSettingsInitializer(), new RewriteExecutionContext()).parse(pomXmlSource).get(0).withSourcePath(Path.of("pom.xml"));
 
         List<Marker> javaProvenanceMarkers = sut.createJavaProvenanceMarkers(maven, projectDirectory, new RewriteExecutionContext());
 
@@ -73,7 +72,7 @@ class JavaProvenanceMarkerFactoryTest {
         Marker javaVersionMarker = extractMarker(javaProvenanceMarkers, JavaVersion.class);
 
         String property = System.getProperty("java.version");
-        int javaVersion = Integer.valueOf(property.contains(".") ? property.substring(0, property.indexOf(".")) : property);
+        String javaVersion = property.contains(".") ? property.split("\\.")[0] : property;
         ResourceVerifierTestHelper.javaVersionMarker(javaVersion, "17", "11").assertMarker(maven, javaVersionMarker);
 
         Marker buildToolMarker = extractMarker(javaProvenanceMarkers, BuildTool.class);

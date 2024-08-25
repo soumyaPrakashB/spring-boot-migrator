@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.sbm.boot.upgrade_27_30.filter;
 
 import org.junit.jupiter.api.Test;
-import org.openrewrite.SourceFile;
 import org.springframework.sbm.boot.properties.SpringApplicationPropertiesPathMatcher;
 import org.springframework.sbm.boot.properties.SpringBootApplicationPropertiesRegistrar;
-import org.springframework.sbm.boot.upgrade_27_30.filter.LoggingDateFormatPropertyFinder;
-import org.springframework.sbm.build.api.BuildFile;
-import org.springframework.sbm.build.impl.OpenRewriteMavenBuildFile;
 import org.springframework.sbm.engine.context.ProjectContext;
-import org.springframework.sbm.project.resource.*;
+import org.springframework.sbm.openrewrite.RewriteExecutionContext;
+import org.springframework.sbm.project.resource.TestProjectContext;
 import org.springframework.sbm.properties.api.PropertiesSource;
 
 import java.nio.file.Path;
@@ -68,8 +64,8 @@ public class LoggingDateFormatPropertyFinderTest {
     @Test
     public void givenProjectWithLogDateFormatCustomization_findResources_returnResource(){
         ProjectContext projectContext = TestProjectContext.buildProjectContext()
-                .addRegistrar(new SpringBootApplicationPropertiesRegistrar(new SpringApplicationPropertiesPathMatcher()))
-                .addProjectResource(Path.of("src", "main", "resources", "application.properties"), APPLICATION_PROPERTIES_WITH_LOG_DATE_FORMAT)
+                .addRegistrar(new SpringBootApplicationPropertiesRegistrar(new SpringApplicationPropertiesPathMatcher(), new RewriteExecutionContext()))
+                .withProjectResource(Path.of("src", "main", "resources", "application.properties"), APPLICATION_PROPERTIES_WITH_LOG_DATE_FORMAT)
                 .build();
 
         LoggingDateFormatPropertyFinder loggingDateFormatPropertyFinder = new LoggingDateFormatPropertyFinder();
@@ -83,11 +79,11 @@ public class LoggingDateFormatPropertyFinderTest {
     public void givenMultiModuleProjectWithLogDateFormatCustomization_findResources_returnResource(){
         ProjectContext projectContext = TestProjectContext.buildProjectContext()
                 .withMavenRootBuildFileSource(MULTI_MODULE_POM_XML)
-                .addProjectResource(Path.of("module1","pom.xml"),SUB_MODULE_POM_XML.replace("{{module}}", "module1"))
-                .addProjectResource(Path.of("module2","pom.xml"),SUB_MODULE_POM_XML.replace("{{module}}", "module2"))
-                .addRegistrar(new SpringBootApplicationPropertiesRegistrar(new SpringApplicationPropertiesPathMatcher()))
-                .addProjectResource(Path.of("module1","src", "main", "resources", "application.properties"), APPLICATION_PROPERTIES_WITH_LOG_DATE_FORMAT)
-                .addProjectResource(Path.of("module2","src", "main", "resources", "application.properties"), APPLICATION_PROPERTIES_WITH_LOG_DATE_FORMAT)
+                .withProjectResource(Path.of("module1","pom.xml"),SUB_MODULE_POM_XML.replace("{{module}}", "module1"))
+                .withProjectResource(Path.of("module2","pom.xml"),SUB_MODULE_POM_XML.replace("{{module}}", "module2"))
+                .addRegistrar(new SpringBootApplicationPropertiesRegistrar(new SpringApplicationPropertiesPathMatcher(), new RewriteExecutionContext()))
+                .withProjectResource(Path.of("module1","src", "main", "resources", "application.properties"), APPLICATION_PROPERTIES_WITH_LOG_DATE_FORMAT)
+                .withProjectResource(Path.of("module2","src", "main", "resources", "application.properties"), APPLICATION_PROPERTIES_WITH_LOG_DATE_FORMAT)
                 .build();
 
         LoggingDateFormatPropertyFinder loggingDateFormatPropertyFinder = new LoggingDateFormatPropertyFinder();

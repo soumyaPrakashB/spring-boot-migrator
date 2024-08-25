@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,12 @@
  */
 package org.springframework.sbm.jee.jaxrs.recipes;
 
-import lombok.RequiredArgsConstructor;
 import org.openrewrite.Recipe;
 import org.openrewrite.java.ChangeType;
 import org.openrewrite.java.JavaParser;
 import org.openrewrite.java.JavaTemplate;
-import org.springframework.sbm.java.migration.recipes.FindReplaceFieldAccessors;
 import org.springframework.sbm.java.migration.recipes.RewriteMethodInvocation;
+import org.springframework.sbm.java.migration.recipes.openrewrite.ReplaceConstantWithAnotherConstant;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -80,8 +79,9 @@ public class SwapStatusForHttpStatus extends Recipe {
         fieldsMapping.put("UNSUPPORTED_MEDIA_TYPE", "UNSUPPORTED_MEDIA_TYPE");
         fieldsMapping.put("USE_PROXY", "USE_PROXY");
 
-        doNext(new FindReplaceFieldAccessors(javaParserSupplier, "javax.ws.rs.core.Response$Status", "org.springframework.http.HttpStatus", fieldsMapping));
-
+        fieldsMapping.forEach(
+                (key, value) -> doNext(new ReplaceConstantWithAnotherConstant("javax.ws.rs.core.Response$Status." + key,"org.springframework.http.HttpStatus." + value))
+        );
 
         // Instance methods
         doNext(new RewriteMethodInvocation(methodInvocationMatcher("javax.ws.rs.core.Response.StatusType getStatusCode()")

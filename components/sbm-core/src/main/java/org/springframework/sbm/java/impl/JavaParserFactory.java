@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.springframework.sbm.java.impl;
 
 import org.jetbrains.annotations.NotNull;
+import org.openrewrite.ExecutionContext;
 import org.openrewrite.java.JavaParser;
 import org.springframework.sbm.project.resource.SbmApplicationProperties;
 
@@ -30,17 +31,17 @@ import java.util.Set;
 public class JavaParserFactory {
 
     @Deprecated
-    public static @NotNull JavaParser getInitialJavaParser() {
+    public static @NotNull JavaParser getInitialJavaParser(ExecutionContext executionContext) {
         Set<Path> dependencies = ClasspathRegistry.getInstance().getInitialDependencies();
-        JavaParser javaParser = new RewriteJavaParser(new SbmApplicationProperties());
+        JavaParser javaParser = new RewriteJavaParser(new SbmApplicationProperties(), executionContext);
         javaParser.setClasspath(new ArrayList<>(dependencies));
         return javaParser;
     }
 
     @Deprecated
-    public static @NotNull JavaParser getCurrentJavaParser() {
+    public static @NotNull JavaParser getCurrentJavaParser(ExecutionContext executionContext) {
         Set<Path> dependencies = ClasspathRegistry.getInstance().getCurrentDependencies();
-        JavaParser javaParser = new RewriteJavaParser(new SbmApplicationProperties());
+        JavaParser javaParser = new RewriteJavaParser(new SbmApplicationProperties(), executionContext);
         javaParser.setClasspath(new ArrayList<>(dependencies));
         return javaParser;
     }

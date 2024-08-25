@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ public class MigrateJpaApplicationIntegrationTest extends IntegrationTestBaseCla
         assertThat(super.loadJavaFile("org.superbiz.injection.h3jpa", "SpringBootApp")).isNotEmpty();
         assertThat(super.loadTestJavaFile("org.superbiz.injection.h3jpa", "SpringBootAppTest")).isNotEmpty();
         String movies = loadJavaFile("org.superbiz.injection.h3jpa", "Movies");
-        assertThat(movies).contains(
+        assertThat(movies.replace("\r\n", "\n").replace("\r", "\n")).contains(
                 """
                 package org.superbiz.injection.h3jpa;
                  

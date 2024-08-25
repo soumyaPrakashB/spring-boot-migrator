@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,17 +41,17 @@ public class ProgressRendererLogbackLogAdapter {
     public ProgressRendererLogbackLogAdapter(Map<Level, Consumer<String>> consumerMap) {
         logCtx = (LoggerContext) LoggerFactory.getILoggerFactory();
         Logger logger = logCtx.getLogger("ROOT");
-        if(logger.getAppender("console") != null) {
+        if (logger.getAppender("console") != null) {
             detachedAppenders.add(logger.getAppender("console"));
         }
-        if(logger.getAppender("CONSOLE") != null) {
+        if (logger.getAppender("CONSOLE") != null) {
             detachedAppenders.add(logger.getAppender("CONSOLE"));
         }
-        if(logger.getAppender("CONSOLE") != null) {
+        if (logger.getAppender("CONSOLE") != null) {
             detachedAppenders.add(logger.getAppender("CONSOLE"));
             logger.detachAppender("CONSOLE");
         }
-        if(logger.getAppender("stdout") != null) {
+        if (logger.getAppender("stdout") != null) {
             detachedAppenders.add(logger.getAppender("stdout"));
         }
         logAppender = new ErrorLogAppender(consumerMap);
@@ -59,28 +59,28 @@ public class ProgressRendererLogbackLogAdapter {
     }
 
     public void start() {
-        if(logAppender.isStarted()) return;
+        if (logAppender.isStarted()) return;
         Logger logger = logCtx.getLogger("ROOT");
-        detachedAppenders.forEach(a -> logger.detachAppender(a));
+        detachedAppenders.forEach(logger::detachAppender);
         logger.addAppender(logAppender);
         logAppender.setContext(logCtx);
         logAppender.start();
     }
 
     public void stop() {
-        if(!logAppender.isStarted()) return;
+        if (!logAppender.isStarted()) return;
         logAppender.stop();
         LoggerContext logCtx = (LoggerContext) LoggerFactory.getILoggerFactory();
         Logger root = logCtx.getLogger("ROOT");
         detachedAppenders.forEach(a -> {
-            if(!root.isAttached(a)) {
+            if (!root.isAttached(a)) {
                 root.addAppender(a);
             }
         });
         root.detachAppender(logAppender);
     }
 
-    public class ErrorLogAppender extends AppenderBase<ILoggingEvent> {
+    public static class ErrorLogAppender extends AppenderBase<ILoggingEvent> {
         private final Map<Level, Consumer<String>> consumerMap;
 
         public ErrorLogAppender(Map<Level, Consumer<String>> consumerMap) {
@@ -89,7 +89,7 @@ public class ProgressRendererLogbackLogAdapter {
 
         @Override
         protected void append(ILoggingEvent iLoggingEvent) {
-            if(consumerMap.containsKey(iLoggingEvent.getLevel())) {
+            if (consumerMap.containsKey(iLoggingEvent.getLevel())) {
                 consumerMap.get(iLoggingEvent.getLevel()).accept(iLoggingEvent.getMessage());
             }
         }

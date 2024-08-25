@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@ package org.springframework.sbm.project.parser;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
+import org.openrewrite.ExecutionContext;
 import org.openrewrite.Parser;
 import org.openrewrite.SourceFile;
 import org.openrewrite.hcl.HclParser;
@@ -28,19 +30,21 @@ import org.openrewrite.protobuf.ProtoParser;
 import org.openrewrite.text.PlainTextParser;
 import org.openrewrite.tree.ParsingExecutionContextView;
 import org.openrewrite.xml.XmlParser;
-import org.openrewrite.xml.tree.Xml;
 import org.openrewrite.yaml.YamlParser;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.io.Resource;
 import org.springframework.sbm.engine.events.StartedScanningProjectResourceEvent;
-import org.springframework.sbm.openrewrite.RewriteExecutionContext;
+import org.springframework.sbm.utils.LinuxWindowsPathUnifier;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 @Component
@@ -54,6 +58,7 @@ public class ResourceParser {
     private final PlainTextParser plainTextParser;
     private final ResourceFilter resourceFilter;
     private final ApplicationEventPublisher eventPublisher;
+    private final ExecutionContext executionContext;
 
     List<Resource> filter(Path projectDirectory, Set<Path> resourcePaths, List<Resource> resources, Path relativeModuleDir) {
         Path comparingPath = relativeModuleDir != null ? projectDirectory.resolve(relativeModuleDir) : projectDirectory;
@@ -111,15 +116,52 @@ public class ResourceParser {
             parserAndParserInputMappings.get(parser).add(r);
         });
 
-        ParsingExecutionContextView ctx = ParsingExecutionContextView.view(new RewriteExecutionContext(eventPublisher));
+        ParsingExecutionContextView ctx = ParsingExecutionContextView.view(executionContext);
         ctx.setParsingListener((input, sourceFile) -> eventPublisher.publishEvent(new StartedScanningProjectResourceEvent(sourceFile.getSourcePath())));
 
         return parserAndParserInputMappings.entrySet().stream()
-                .map(e -> e.getKey().parseInputs(e.getValue(), baseDir, ctx))
+                .filter(ifNoInput())
+                .map(parseEntry(baseDir, ctx))
                 .flatMap(List::stream)
                 .map(e -> addMarkers(e, markers))
                 .collect(Collectors.toList());
 
+    }
+
+    @NotNull
+    private Function<Map.Entry<Parser<? extends SourceFile>, List<Parser.Input>>, ? extends List<? extends SourceFile>> parseEntry(Path baseDir, ParsingExecutionContextView ctx) {
+        return e -> {
+            Stream<SourceFile> sourceFileStream = getSourceFileStream(baseDir, ctx, e);
+            return sourceFileStream.toList();
+        };
+    }
+
+    @NotNull
+    private Stream<SourceFile> getSourceFileStream(Path baseDir, ExecutionContext ctx, Map.Entry<Parser<? extends SourceFile>, List<Parser.Input>> e) {
+        return e
+                .getValue()
+                .stream()
+                .map(resource -> (List<SourceFile>) parseSingleResource(baseDir, ctx, e, resource))
+                .flatMap(elem -> Stream.ofNullable(elem))
+                .flatMap(List::stream);
+    }
+
+    private List<? extends SourceFile> parseSingleResource(Path baseDir, ExecutionContext ctx, Map.Entry<Parser<? extends SourceFile>, List<Parser.Input>> e, Parser.Input resource) {
+        try {
+            return e.getKey().parseInputs(List.of(resource), baseDir, ctx);
+        } catch(Exception ex) {
+            if(LinuxWindowsPathUnifier.unifyPath(resource.getPath()).contains("src/test/resources")) {
+                log.error("Could not parse resource '%s' using parser %s. Exception was: %s".formatted(resource.getPath(), e.getKey().getClass().getName(), ex.getMessage()));
+                return null;
+            } else {
+                throw ex;
+            }
+        }
+    }
+
+    @NotNull
+    private Predicate<Map.Entry<Parser<? extends SourceFile>, List<Parser.Input>>> ifNoInput() {
+        return e -> !e.getValue().isEmpty();
     }
 
     private SourceFile addMarkers(SourceFile e, List<Marker> markers) {

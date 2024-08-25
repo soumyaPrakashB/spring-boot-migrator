@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -133,7 +133,7 @@ public class PreconditionVerifierIntegrationTest {
         assertThat(preconditionVerificationResult.getResults().get(0).getMessage()).isEqualTo("Found pom.xml.");
         assertThat(preconditionVerificationResult.getResults().get(1).getState()).isEqualTo(PreconditionCheck.ResultState.PASSED);
 
-        assertThat(preconditionVerificationResult.getResults().get(1).getMessage()).matches("'sbm\\.gitSupportEnabled' is 'true', changes will be committed to branch \\[(master|main)\\] after each recipe\\.");
+        assertThat(preconditionVerificationResult.getResults().get(1).getMessage()).matches("'sbm\\.gitSupportEnabled' is 'true', changes will be committed to branch \\[(master|main)] after each recipe\\.");
         assertThat(preconditionVerificationResult.getResults().get(2).getState()).isEqualTo(PreconditionCheck.ResultState.PASSED);
         assertThat(preconditionVerificationResult.getResults().get(2).getMessage()).isEqualTo("Found required source dir 'src/main/java'.");
         assertThat(preconditionVerificationResult.getResults().get(3).getState()).isEqualTo(PreconditionCheck.ResultState.PASSED);

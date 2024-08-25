@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,7 +91,7 @@ public class MigrateRamlToSpringMvcTest {
                         "org.jboss.spec.javax.ws.rs:jboss-jaxrs-api_2.1_spec:1.0.1.Final",
                         "org.springframework.boot:spring-boot-starter-web:2.4.2"
                 )
-                .addProjectResource("src/main/resources/api.raml", raml)
+                .withProjectResource("src/main/resources/api.raml", raml)
                 .build();
 
         // generate JAX-RS from RAML

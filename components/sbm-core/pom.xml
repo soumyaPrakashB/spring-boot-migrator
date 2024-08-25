@@ -19,7 +19,7 @@
     <parent>
         <artifactId>spring-boot-migrator</artifactId>
         <groupId>org.springframework.sbm</groupId>
-        <version>0.13.1-SNAPSHOT</version>
+        <version>0.15.2-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -30,12 +30,25 @@
         <dependency>
             <groupId>org.springframework.sbm</groupId>
             <artifactId>sbm-openrewrite</artifactId>
-            <version>0.13.1-SNAPSHOT</version>
+            <version>0.15.2-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.sbm</groupId>
+            <artifactId>sbm-utils</artifactId>
+            <version>0.15.2-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-freemarker</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.tngtech.archunit</groupId>
+            <artifactId>archunit-junit5</artifactId>
+            <version>1.2.0</version>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -101,7 +114,7 @@
         <dependency>
             <groupId>org.eclipse.jgit</groupId>
             <artifactId>org.eclipse.jgit</artifactId>
-            <version>6.4.0.202211300538-r</version>
+            <version>6.6.1.202309021850-r</version>
         </dependency>
         <!-- hibernate validator -->
         <dependency>
@@ -150,7 +163,7 @@
         <dependency>
             <groupId>org.springframework.sbm</groupId>
             <artifactId>sbm-openrewrite</artifactId>
-            <version>0.13.1-SNAPSHOT</version>
+            <version>0.15.2-SNAPSHOT</version>
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
@@ -175,6 +188,12 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <excludes>
+                        <!-- Would be picked up by component scan in other modules -->
+                        <exclude>**/org/springframework/sbm/archfitfun/**</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
         </plugins>
     </build>

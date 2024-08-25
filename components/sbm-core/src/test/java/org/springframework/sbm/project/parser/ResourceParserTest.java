@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,7 @@ class ResourceParserTest {
     private Path baseDir = Path.of("some-base-dir").toAbsolutePath();
     private Path resourceDirPath = Path.of("src/main/resources");
     private Set<Path> resourcePaths = Set.of(resourceDirPath);
+    private ExecutionContext executionContext = new RewriteExecutionContext();
 
     @BeforeEach
     void beforeEach() {
@@ -67,7 +68,8 @@ class ResourceParserTest {
                 new RewritePropertiesParser(),
                 new RewritePlainTextParser(),
                 new ResourceParser.ResourceFilter(),
-                eventPublisher
+                eventPublisher,
+                executionContext
                 );
     }
 

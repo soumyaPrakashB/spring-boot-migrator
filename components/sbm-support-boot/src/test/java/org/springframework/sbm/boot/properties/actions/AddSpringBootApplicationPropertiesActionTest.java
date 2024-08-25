@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,14 @@ package org.springframework.sbm.boot.properties.actions;
 import org.springframework.sbm.boot.properties.api.SpringBootApplicationProperties;
 import org.springframework.sbm.boot.properties.search.SpringBootApplicationPropertiesResourceListFilter;
 import org.springframework.sbm.engine.context.ProjectContext;
+import org.springframework.sbm.openrewrite.RewriteExecutionContext;
 import org.springframework.sbm.project.resource.TestProjectContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.sbm.test.ActionTest;
 
 import java.nio.file.Path;
 
@@ -34,32 +36,35 @@ class AddSpringBootApplicationPropertiesActionTest {
 
     @InjectMocks
     private final AddSpringBootApplicationPropertiesAction sut = new AddSpringBootApplicationPropertiesAction();
-    private ProjectContext projectContext;
+    private TestProjectContext.Builder projectContextBuilder;
 
     @BeforeEach
     void beforeEach() {
-        projectContext = TestProjectContext.buildProjectContext()
-                .withProjectRoot(Path.of("."))
-                .build();
+        projectContextBuilder = TestProjectContext.buildProjectContext()
+                .withProjectRoot(Path.of("."));
     }
 
     @Test
     void apply() {
-        sut.apply(projectContext);
-        SpringBootApplicationProperties springBootApplicationProperties = projectContext.search(new SpringBootApplicationPropertiesResourceListFilter()).get(0);
-        assertThat(springBootApplicationProperties).isNotNull();
-        assertThat(springBootApplicationProperties.hasChanges()).isTrue();
+        ActionTest.withProjectContext(projectContextBuilder)
+                .actionUnderTest(sut)
+                .verify(projectContext -> {
+                    SpringBootApplicationProperties springBootApplicationProperties = projectContext.search(new SpringBootApplicationPropertiesResourceListFilter()).get(0);
+                    assertThat(springBootApplicationProperties).isNotNull();
+                    assertThat(springBootApplicationProperties.hasChanges()).isTrue();
+                });
     }
 
     @Test
     void isApplicableShouldReturnTrueWhenNoApplicationPropertiesFileExist() {
-        boolean isApplicable = sut.isApplicable(projectContext);
+        boolean isApplicable = sut.isApplicable(projectContextBuilder.build());
         assertThat(isApplicable).isTrue();
     }
 
     @Test
     void isApplicableShouldReturnFalseWhenApplicationPropertiesFileExist() {
-        projectContext.getProjectResources().add(SpringBootApplicationProperties.newApplicationProperties(projectContext.getProjectRootDirectory(), Path.of("./src/main/resources/application.properties")));
+        ProjectContext projectContext = this.projectContextBuilder.build();
+        projectContext.getProjectResources().add(SpringBootApplicationProperties.newApplicationProperties(projectContext.getProjectRootDirectory(), Path.of("./src/main/resources/application.properties"), new RewriteExecutionContext()));
         boolean isApplicable = sut.isApplicable(projectContext);
         assertThat(isApplicable).isFalse();
     }

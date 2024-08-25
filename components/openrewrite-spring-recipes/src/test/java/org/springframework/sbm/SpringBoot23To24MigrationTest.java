@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,7 +115,7 @@ public class SpringBoot23To24MigrationTest {
 
     List<Resource> resources = List.of();
 
-        ProjectContext projectContext = contextInitializer.initProjectContext(Path.of("./testcode/boot-23-app/given"), resources, new RewriteExecutionContext());
+        ProjectContext projectContext = contextInitializer.initProjectContext(Path.of("./testcode/boot-23-app/given"), resources);
         projectContext.getApplicationModules().getRootModule().getMainResourceSet().addStringResource("src/main/resources/data.sql", "# Empty file");
 
 

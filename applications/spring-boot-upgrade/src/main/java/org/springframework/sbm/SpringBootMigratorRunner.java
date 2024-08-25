@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.springframework.sbm;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Configuration;
@@ -33,10 +34,13 @@ public class SpringBootMigratorRunner implements ApplicationRunner {
     private final ApplyCommand applyCommand;
     private final String REPORT_RECIPE = "sbu30-report";
 
+    @Value("${server.port:8080}")
+    private String port;
+
     @Override
     public void run(ApplicationArguments args) {
         if (args.getSourceArgs().length == 0) {
-            System.err.println("PLease provide the path to the application as parameter.");
+            System.err.println("Please provide the path to the application as parameter.");
             return;
         }
         String applicationPath = args.getSourceArgs()[0];
@@ -44,8 +48,6 @@ public class SpringBootMigratorRunner implements ApplicationRunner {
         ProjectContext context = scanCommand.execute(applicationPath);
         contextHolder.setProjectContext(context);
         applyCommand.execute(contextHolder.getProjectContext(), REPORT_RECIPE);
-        System.out.println("finished scan. Please open: http://localhost:8080/spring-boot-upgrade");
+        System.out.printf("finished scan. Please open: http://localhost:%s/spring-boot-upgrade\n", port);
     }
-
-
 }

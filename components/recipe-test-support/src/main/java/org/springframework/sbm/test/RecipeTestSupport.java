@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 package org.springframework.sbm.test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.sbm.build.impl.MavenBuildFileRefactoringFactory;
 import org.springframework.sbm.build.impl.MavenSettingsInitializer;
 import org.springframework.sbm.build.impl.RewriteMavenParser;
 import org.springframework.sbm.engine.context.ProjectContextHolder;
@@ -24,9 +24,12 @@ import org.springframework.sbm.engine.recipe.*;
 import org.springframework.sbm.java.impl.RewriteJavaParser;
 import org.springframework.sbm.java.util.BasePackageCalculator;
 import org.springframework.sbm.project.RewriteSourceFileWrapper;
+import org.springframework.sbm.project.resource.ProjectResourceSetHolder;
 import org.springframework.sbm.project.resource.SbmApplicationProperties;
 import org.springframework.sbm.project.resource.ResourceHelper;
-import org.springframework.sbm.search.recipe.actions.OpenRewriteJavaSearchAction;
+import org.springframework.sbm.scopes.ExecutionScope;
+import org.springframework.sbm.scopes.ScanScope;
+import org.springframework.sbm.scopes.ScopeConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -66,14 +69,18 @@ public class RecipeTestSupport {
             DefaultActionDeserializer.class,
             RewriteJavaSearchActionDeserializer.class,
             RewriteRecipeLoader.class,
-            RewriteRecipeRunner.class,
             RewriteMigrationResultMerger.class,
             RewriteSourceFileWrapper.class,
             SbmRecipeLoader.class,
             BasePackageCalculator.class,
             ProjectContextHolder.class,
             RewriteMavenParser.class,
-            MavenSettingsInitializer.class
+            MavenSettingsInitializer.class,
+            MavenBuildFileRefactoringFactory.class,
+            ProjectResourceSetHolder.class,
+            ScopeConfiguration.class,
+            ExecutionScope.class,
+            ScanScope.class
     };
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import org.springframework.sbm.boot.properties.SpringBootApplicationPropertiesRe
 import org.springframework.sbm.boot.properties.api.SpringBootApplicationProperties;
 import org.springframework.sbm.boot.properties.search.SpringBootApplicationPropertiesResourceListFilter;
 import org.springframework.sbm.engine.context.ProjectContext;
+import org.springframework.sbm.openrewrite.RewriteExecutionContext;
 import org.springframework.sbm.project.resource.TestProjectContext;
 
 import java.util.List;
@@ -34,8 +35,8 @@ public class Boot_27_30_JmxEndpointExposureActionTest {
     @Test
     public void givenAProjectWithoutJmxEndpointExposureOverride_andSpringBootProperties_applyAction_expectPropertyAdded() {
         ProjectContext projectContext = TestProjectContext.buildProjectContext()
-                .addRegistrar(new SpringBootApplicationPropertiesRegistrar(new SpringApplicationPropertiesPathMatcher()))
-                .addProjectResource("src/main/resources/application.properties", DUMMY_PROPERTY_FILE)
+                .addRegistrar(new SpringBootApplicationPropertiesRegistrar(new SpringApplicationPropertiesPathMatcher(), new RewriteExecutionContext()))
+                .withProjectResource("src/main/resources/application.properties", DUMMY_PROPERTY_FILE)
                 .build();
 
         Boot_27_30_JmxEndpointExposureAction boot_27_30_jmxEndpointExposureAction = new Boot_27_30_JmxEndpointExposureAction();

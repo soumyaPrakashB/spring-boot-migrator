@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -157,8 +157,15 @@ public class OpenRewriteMavenPlugin implements Plugin {
 				String configurationXml = MavenXmlMapper.writeMapper().writerWithDefaultPrettyPrinter()
 						.writeValueAsString(configuration).replaceFirst("<LinkedHashMap>", "")
 						.replace("</LinkedHashMap>", "").replace("<LinkedHashMap/>", "").trim();
-				OpenRewriteMavenPlugin.this.refactoring.execute(new ChangePluginConfiguration(
-						OpenRewriteMavenPlugin.this.groupId, OpenRewriteMavenPlugin.this.artifactId, configurationXml));
+				OpenRewriteMavenPlugin.this.refactoring.execute(
+						OpenRewriteMavenPlugin.this.getResourceWrapper(),
+						new ChangePluginConfiguration(
+							OpenRewriteMavenPlugin.this.groupId,
+							OpenRewriteMavenPlugin.this.artifactId,
+							configurationXml
+						)
+				);
+				OpenRewriteMavenPlugin.this.refactoring.refreshPomModels();
 			}
 			catch (JsonProcessingException e) {
 				throw new RuntimeException(e);

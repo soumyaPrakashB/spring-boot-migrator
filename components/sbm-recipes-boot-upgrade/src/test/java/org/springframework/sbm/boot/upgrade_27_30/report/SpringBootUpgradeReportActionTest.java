@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.springframework.sbm.boot.properties.SpringApplicationPropertiesPathMatcher;
 import org.springframework.sbm.boot.properties.SpringBootApplicationPropertiesRegistrar;
 import org.springframework.sbm.engine.context.ProjectContext;
+import org.springframework.sbm.openrewrite.RewriteExecutionContext;
 import org.springframework.sbm.project.resource.TestProjectContext;
 import org.springframework.sbm.test.RecipeIntegrationTestSupport;
 import org.w3c.dom.NodeList;
@@ -44,9 +45,9 @@ class SpringBootUpgradeReportActionTest {
     @Test
     void renderReport() throws IOException {
         ProjectContext context = TestProjectContext.buildProjectContext()
-                .addRegistrar(new SpringBootApplicationPropertiesRegistrar(new SpringApplicationPropertiesPathMatcher()))
-                .addProjectResource("src/main/resources/application.properties", "spring.data.foo=bar")
-                .addProjectResource("src/main/resources/application-another.properties", "spring.data.here=there")
+                .addRegistrar(new SpringBootApplicationPropertiesRegistrar(new SpringApplicationPropertiesPathMatcher(), new RewriteExecutionContext()))
+                .withProjectResource("src/main/resources/application.properties", "spring.data.foo=bar")
+                .withProjectResource("src/main/resources/application-another.properties", "spring.data.here=there")
                 .build();
 
         @Language("adoc")
@@ -159,7 +160,7 @@ class SpringBootUpgradeReportActionTest {
                     <parent>
                         <groupId>org.springframework.boot</groupId>
                         <artifactId>spring-boot-starter-parent</artifactId>
-                        <version>2.7.3</version>
+                        <version>2.7.2</version>
                         <relativePath/> <!-- lookup parent from repository -->
                     </parent>
                     <groupId>com.example</groupId>
@@ -196,10 +197,10 @@ class SpringBootUpgradeReportActionTest {
                 """;
 
         TestProjectContext.buildProjectContext()
-                .addRegistrar(new SpringBootApplicationPropertiesRegistrar(new SpringApplicationPropertiesPathMatcher()))
+                .addRegistrar(new SpringBootApplicationPropertiesRegistrar(new SpringApplicationPropertiesPathMatcher(), new RewriteExecutionContext()))
                 .withMavenRootBuildFileSource(pomSource)
-                .addProjectResource("src/main/resources/application.properties", "spring.data.foo=bar")
-                .addProjectResource("src/main/resources/application-another.properties", "spring.data.here=there")
+                .withProjectResource("src/main/resources/application.properties", "spring.data.foo=bar")
+                .withProjectResource("src/main/resources/application-another.properties", "spring.data.here=there")
                 .serializeProjectContext(tempDir);
 
         RecipeIntegrationTestSupport.initializeProject(tempDir, "spring-upgrade-report")
@@ -217,8 +218,8 @@ class SpringBootUpgradeReportActionTest {
             // verify title and some elements to verify the HTML was rendered
             assertThat(pageAsText.contains("Spring Boot 3 Upgrade Report")).isTrue();
             assertThat(h2Headers).containsExactly(
-                    "1. Introduction",
-                    "2. Relevant Changes"
+                    "Introduction",
+                    "Relevant Changes"
             );
             assertThat(h3Headers).anySatisfy(e -> e.matches("2\\.\\d Changes to Data Properties"));
             assertThat(h3Headers).anySatisfy(e -> e.matches("2\\.\\d Logging Date Format"));

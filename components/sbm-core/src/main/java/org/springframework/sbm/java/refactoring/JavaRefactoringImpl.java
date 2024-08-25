@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,23 +30,19 @@ import java.util.stream.Collectors;
 
 public class JavaRefactoringImpl extends JavaGlobalRefactoringImpl implements JavaRefactoring {
 
-    private J.CompilationUnit compilationUnit;
-
     @Deprecated
-    public JavaRefactoringImpl(ProjectResourceSet projectResources) {
-        super(projectResources);
+    public JavaRefactoringImpl(ProjectResourceSet projectResources, ExecutionContext executionContext) {
+        super(projectResources, executionContext);
     }
 
     @Deprecated
-    public JavaRefactoringImpl(ProjectResourceSet projectResourceSet, J.CompilationUnit compilationUnit) {
-        super(projectResourceSet);
-        this.compilationUnit = compilationUnit;
+    public JavaRefactoringImpl(ProjectResourceSet projectResourceSet, J.CompilationUnit compilationUnit, ExecutionContext executionContext) {
+        super(projectResourceSet, executionContext);
     }
 
     @Deprecated
-    public JavaRefactoringImpl(ProjectResourceSet projectResourceSet, RewriteSourceFileHolder<J.CompilationUnit> rewriteSourceFileHolder) {
-        super(projectResourceSet);
-        this.compilationUnit = rewriteSourceFileHolder.getSourceFile();
+    public JavaRefactoringImpl(ProjectResourceSet projectResourceSet, RewriteSourceFileHolder<J.CompilationUnit> rewriteSourceFileHolder, ExecutionContext executionContext) {
+        super(projectResourceSet, executionContext);
     }
 
     @Override

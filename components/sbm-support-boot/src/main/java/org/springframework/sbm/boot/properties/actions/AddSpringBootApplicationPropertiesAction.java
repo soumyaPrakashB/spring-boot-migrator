@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,15 @@
  */
 package org.springframework.sbm.boot.properties.actions;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
+import org.openrewrite.ExecutionContext;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.sbm.boot.properties.api.SpringBootApplicationProperties;
 import org.springframework.sbm.boot.properties.search.SpringBootApplicationPropertiesResourceListFilter;
 import org.springframework.sbm.build.api.Module;
@@ -36,6 +39,13 @@ import java.nio.file.Path;
 public class AddSpringBootApplicationPropertiesAction extends AbstractAction {
 
     public static final Path APPLICATION_PROPERTIES_PATH = Path.of("src/main/resources/application.properties");
+    @Autowired
+    @JsonIgnore
+    private ExecutionContext executionContext;
+
+    public AddSpringBootApplicationPropertiesAction(ExecutionContext executionContext) {
+        this.executionContext = executionContext;
+    }
 
     @Override
     public void apply(ProjectContext context) {
@@ -53,7 +63,8 @@ public class AddSpringBootApplicationPropertiesAction extends AbstractAction {
         SpringBootApplicationProperties springBootApplicationProperties = SpringBootApplicationProperties
 				.newApplicationProperties(
 						module.getProjectRootDirectory(),
-						module.getModulePath().resolve(APPLICATION_PROPERTIES_PATH)
+						module.getModulePath().resolve(APPLICATION_PROPERTIES_PATH),
+                        executionContext
 				);
         module.getMainResourceSet().addResource(springBootApplicationProperties);
     }

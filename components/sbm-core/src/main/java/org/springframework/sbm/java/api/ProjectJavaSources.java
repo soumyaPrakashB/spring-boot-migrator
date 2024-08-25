@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ public interface ProjectJavaSources {
 
     List<RewriteSourceFileHolder<J.CompilationUnit>> find(Recipe find);
 
-    void replaceType(String annotation, String withAnnotation);
+    void replaceType(String existingType, String withType);
 
     /**
      * Tries to match regex against imports of all Java sources.
@@ -54,5 +54,5 @@ public interface ProjectJavaSources {
 
     List<JavaSourceAndType> findTypesImplementing(String interfaceType);
 
-    List<? extends JavaSource> findClassesUsingType(String databaseDriverGAE);
+    List<? extends JavaSource> findClassesUsingType(String type);
 }

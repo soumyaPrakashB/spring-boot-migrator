@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,9 +48,9 @@ public class CommentJavaSearchResult implements Marker {
     }
 
     @Override
-    public <T extends Tree> T withId(final UUID id) {
+    public <M extends Marker> M withId(final UUID id) {
         CommentJavaSearchResult commentJavaSearchResult = this.id == id ? this : new CommentJavaSearchResult(id, searchResult.getDescription());
-        return (T) commentJavaSearchResult;
+        return (M) commentJavaSearchResult;
     }
 
     public String getComment() {

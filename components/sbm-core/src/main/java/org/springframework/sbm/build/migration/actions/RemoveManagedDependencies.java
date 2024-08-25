@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,9 @@
  */
 package org.springframework.sbm.build.migration.actions;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.openrewrite.ExecutionContext;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.sbm.build.api.Dependency;
 import org.springframework.sbm.build.api.SpringManagedDependencies;
 import org.springframework.sbm.engine.context.ProjectContext;
@@ -33,6 +36,10 @@ import static org.openrewrite.maven.tree.Scope.Compile;
  */
 public class RemoveManagedDependencies extends AbstractAction {
 
+    @Autowired
+    @JsonIgnore
+    private ExecutionContext executionContext;
+
     @Override
     public void apply(ProjectContext context) {
         //FIXME handle multi-module projects
@@ -40,7 +47,7 @@ public class RemoveManagedDependencies extends AbstractAction {
                 .getDeclaredDependencies(Compile)
                 .stream()
                 .filter(this::isSpringFrameworkDependency)
-                .map(d -> SpringManagedDependencies.by(d.getGroupId(),d.getArtifactId(),d.getVersion()))
+                .map(d -> SpringManagedDependencies.by(d.getGroupId(),d.getArtifactId(),d.getVersion(), executionContext))
                 .flatMap(SpringManagedDependencies::stream)
                 .distinct()
                 .collect(Collectors.toList());

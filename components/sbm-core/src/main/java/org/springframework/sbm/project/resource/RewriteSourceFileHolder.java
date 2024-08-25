@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package org.springframework.sbm.project.resource;
 
 import lombok.Getter;
 import org.openrewrite.SourceFile;
+import org.springframework.sbm.utils.LinuxWindowsPathUnifier;
 
 import java.nio.file.Path;
 import java.util.UUID;
@@ -40,17 +41,37 @@ public class RewriteSourceFileHolder<T extends SourceFile> extends BaseProjectRe
     }
 
     public String print() {
-        return sourceFile.printAll();
+        try {
+            return sourceFile.printAll();
+        } catch (Exception e) {
+            throw new RuntimeException("Exception while printing '%s'".formatted(sourceFile.getSourcePath()), e);
+        }
     }
 
     @Override
     public Path getSourcePath() {
-        return sourceFile.getSourcePath();
+        return LinuxWindowsPathUnifier.unify(sourceFile.getSourcePath());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getSourcePathString() {
+        return LinuxWindowsPathUnifier.unifyPath(getSourcePath());
     }
 
     @Override
     public Path getAbsolutePath() {
-        return absoluteProjectDir.resolve(getSourcePath()).normalize().toAbsolutePath();
+        return LinuxWindowsPathUnifier.unify(absoluteProjectDir.resolve(getSourcePath()).normalize().toAbsolutePath());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getAbsolutePathString() {
+        return LinuxWindowsPathUnifier.unifyPath(getAbsolutePath());
     }
 
     /**
@@ -69,7 +90,7 @@ public class RewriteSourceFileHolder<T extends SourceFile> extends BaseProjectRe
         if (absoluteProjectDir.resolve(newPath).toFile().isDirectory()) {
             newPath = newPath.resolve(this.getAbsolutePath().getFileName());
         }
-        sourceFile = (T) sourceFile.withSourcePath(newPath);
+        sourceFile = sourceFile.withSourcePath(newPath);
         this.markChanged();
     }
 

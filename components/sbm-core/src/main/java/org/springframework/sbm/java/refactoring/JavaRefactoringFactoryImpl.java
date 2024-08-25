@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package org.springframework.sbm.java.refactoring;
 
+import org.openrewrite.ExecutionContext;
 import org.springframework.sbm.project.resource.ProjectResourceSetHolder;
 import org.springframework.sbm.project.resource.RewriteSourceFileHolder;
 import lombok.RequiredArgsConstructor;
@@ -26,23 +27,27 @@ import org.springframework.stereotype.Component;
 public class JavaRefactoringFactoryImpl implements JavaRefactoringFactory {
 
     private final ProjectResourceSetHolder projectResourceSetHolder;
+    private final ExecutionContext executionContext;
 
     @Override
     @Deprecated
     public JavaRefactoring createRefactoring(J.CompilationUnit compilationUnit) {
-        JavaRefactoringImpl refactoring = new JavaRefactoringImpl(projectResourceSetHolder.getProjectResourceSet(), compilationUnit);
+        JavaRefactoringImpl refactoring = new JavaRefactoringImpl(projectResourceSetHolder.getProjectResourceSet(), compilationUnit,
+                                                                  executionContext);
         return refactoring;
     }
 
     @Override
     public JavaGlobalRefactoring createRefactoring() {
-        JavaGlobalRefactoring refactoring = new JavaGlobalRefactoringImpl(projectResourceSetHolder.getProjectResourceSet());
+        JavaGlobalRefactoring refactoring = new JavaGlobalRefactoringImpl(projectResourceSetHolder.getProjectResourceSet(),
+                                                                          executionContext);
         return refactoring;
     }
 
     @Override
     public JavaRefactoring createRefactoring(RewriteSourceFileHolder<J.CompilationUnit> rewriteSourceFileHolder) {
-        JavaRefactoringImpl refactoring = new JavaRefactoringImpl(projectResourceSetHolder.getProjectResourceSet(), rewriteSourceFileHolder);
+        JavaRefactoringImpl refactoring = new JavaRefactoringImpl(projectResourceSetHolder.getProjectResourceSet(), rewriteSourceFileHolder,
+                                                                  executionContext);
         return refactoring;
     }
 }

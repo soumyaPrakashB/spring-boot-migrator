@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.springframework.sbm;
 
 import org.openrewrite.maven.AddPluginDependency;
+import org.openrewrite.maven.UpdateMavenModel;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.sbm.build.impl.OpenRewriteMavenBuildFile;
@@ -25,6 +26,7 @@ import org.springframework.sbm.engine.recipe.Action;
 import org.springframework.sbm.engine.recipe.Condition;
 import org.springframework.sbm.engine.recipe.Recipe;
 import org.springframework.sbm.spring.migration.actions.OpenRewriteRecipeAdapterAction;
+import org.springframework.sbm.support.openrewrite.GenericOpenRewriteRecipe;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -69,7 +71,7 @@ public class OrRecipesConfig {
         
         r.doNext(new RemoveMavenPlugin("org.codehaus.mojo", "cobertura-maven-plugin"));
         r.doNext(new AddPluginDependency("ro.isdc.wro4j", "wro4j-maven-plugin", "org.mockito", "mockito-core", "${mockito.version}"));
-        r.doNext(new OpenRewriteMavenBuildFile.RefreshPomModel());
+        r.doNext(new GenericOpenRewriteRecipe<>(() -> new UpdateMavenModel<>()));
 
         AnyDeclaredDependencyExistMatchingRegex condition = new AnyDeclaredDependencyExistMatchingRegex();
         condition.setDependencies(List.of("org\\.springframework\\.boot:.*:1\\..*"));

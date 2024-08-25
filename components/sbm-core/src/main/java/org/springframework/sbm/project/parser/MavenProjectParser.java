@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,8 @@ import org.openrewrite.java.tree.J;
 import org.openrewrite.marker.GitProvenance;
 import org.openrewrite.marker.Marker;
 import org.openrewrite.marker.ci.BuildEnvironment;
+import org.openrewrite.maven.MavenExecutionContextView;
+import org.openrewrite.maven.MavenSettings;
 import org.openrewrite.maven.tree.*;
 import org.openrewrite.maven.utilities.MavenArtifactDownloader;
 import org.openrewrite.xml.tree.Xml;
@@ -36,7 +38,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.sbm.build.impl.MavenBuildFileUtil;
 import org.springframework.sbm.build.impl.RewriteMavenParser;
 import org.springframework.sbm.engine.events.*;
-import org.springframework.sbm.openrewrite.RewriteExecutionContext;
+import org.springframework.sbm.scopes.ProjectMetadata;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -53,7 +55,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-// FIXME: #7 rename to ProjectParser
 public class MavenProjectParser {
 
     private final ResourceParser resourceParser;
@@ -63,29 +64,33 @@ public class MavenProjectParser {
     private final JavaProvenanceMarkerFactory javaProvenanceMarkerFactory;
     private final JavaParser javaParser;
     private final MavenConfigHandler mavenConfigHandler;
+    private final ProjectMetadata projectMetadata;
+    private final ExecutionContext executionContext;
 
     public List<SourceFile> parse(Path projectDirectory, List<Resource> resources) {
-
+        projectMetadata.setMetadata("some metadata");
+        MavenSettings mavenSettings = new MavenSettings(null, null, null, null, null);
+        projectMetadata.setMavenSettings(mavenSettings);
+        MavenExecutionContextView mavenExecutionContext = MavenExecutionContextView.view(executionContext);
+        mavenExecutionContext.setMavenSettings(mavenSettings);
+        Path localRepo = Path.of(System.getProperty("user.home")).resolve(".m2/repository");
+        MavenExecutionContextView.view(executionContext).setLocalRepository(new MavenRepository("local", localRepo.toUri().toString(), null, null, false, null, null, null));
+        // default local repo provided by MavenExecutionContextView misses two '/' in the path
         mavenConfigHandler.injectMavenConfigIntoSystemProperties(resources);
 
-        ExecutionContext ctx = new RewriteExecutionContext();
         @Nullable BuildEnvironment buildEnvironment = null;
         GitProvenance gitProvenance = GitProvenance.fromProjectDirectory(projectDirectory, buildEnvironment);
 
         List<Resource> filteredMavenPoms = filterMavenPoms(resources);
-        List<Parser.Input> inputs = filteredMavenPoms.stream()
-                .map(r -> new Parser.Input(getPath(r),
-                                () -> {
-                                    eventPublisher.publishEvent(new StartedScanningProjectResourceEvent(getPath(r)));
-                                    InputStream is = getInputStream(r);
-                                    return is;
-                                }
-                        )
-                )
-                .collect(Collectors.toList());
+        List<Parser.Input> inputs = filteredMavenPoms.stream().map(r -> new Parser.Input(getPath(r), () -> {
+            eventPublisher.publishEvent(new StartedScanningProjectResourceEvent(getPath(r)));
+            InputStream is = getInputStream(r);
+            return is;
+        })).collect(Collectors.toList());
 
         eventPublisher.publishEvent(new StartedScanningProjectResourceSetEvent("Maven", inputs.size()));
-        List<Xml.Document> mavens = mavenParser.parseInputs(inputs, projectDirectory, ctx);
+
+        List<Xml.Document> mavens = mavenParser.parseInputs(inputs, projectDirectory, executionContext);
         eventPublisher.publishEvent(new FinishedScanningProjectResourceSetEvent());
 
         mavens = sort(mavens);
@@ -100,7 +105,9 @@ public class MavenProjectParser {
         List<SourceFile> sourceFiles = new ArrayList<>();
         for (Xml.Document pomXml : mavens) {
             // Create markers for pom
-            List<Marker> javaProvenanceMarkers = javaProvenanceMarkerFactory.createJavaProvenanceMarkers(pomXml, projectDirectory, ctx);
+            List<Marker> javaProvenanceMarkers = javaProvenanceMarkerFactory.createJavaProvenanceMarkers(pomXml,
+                                                                                                         projectDirectory,
+                                                                                                         executionContext);
             // Add markers to pom
             Xml.Document mavenWithMarkers = addMarkers(pomXml, javaProvenanceMarkers);
             // Add pom to sources
@@ -109,14 +116,18 @@ public class MavenProjectParser {
             // download pom dependencies, provided scope contains compile scope
             Path relativeModuleDir = mavenWithMarkers.getSourcePath().getParent();
             Path mavenProjectDirectory = projectDirectory;
-            if(relativeModuleDir != null) {
+            if (relativeModuleDir != null) {
                 mavenProjectDirectory = projectDirectory.resolve(relativeModuleDir);
             }
 
             // --------
             // Main Java sources
-            List<J.CompilationUnit> mainJavaSources = parseMainJavaSources(projectDirectory, resources, ctx, javaParser, pomXml, mavenWithMarkers, mavenProjectDirectory, javaProvenanceMarkers);
-            JavaSourceSet mainSourceSet = javaParser.getSourceSet(ctx);
+            List<J.CompilationUnit> mainJavaSources = parseMainJavaSources(projectDirectory, resources,
+                                                                           executionContext, javaParser,
+                                                                           pomXml, mavenWithMarkers,
+                                                                           mavenProjectDirectory,
+                                                                           javaProvenanceMarkers);
+            JavaSourceSet mainSourceSet = javaParser.getSourceSet(executionContext);
             sourceFiles.addAll(mainJavaSources);
             // FIxME: cus already have sourceSetMarker, only provenance need to be added
 
@@ -138,7 +149,9 @@ public class MavenProjectParser {
 
             List<Marker> resourceMarker = new ArrayList(javaProvenanceMarkers);
             resourceMarker.add(mainSourceSet);
-            resourceMarker.add(gitProvenance);
+            if(gitProvenance != null) {
+                resourceMarker.add(gitProvenance);
+            }
             List<SourceFile> mainResources = resourceParser.parse(projectDirectory, resourceList, resourceMarker);
             sourceFiles.addAll(mainResources);
 
@@ -146,8 +159,9 @@ public class MavenProjectParser {
             // Test Java sources
             ArrayList<Marker> markers = new ArrayList<>(javaProvenanceMarkers);
             markers.add(mainSourceSet);
-            List<J.CompilationUnit> testJavaSources = parseTestJavaSources(projectDirectory, resources, ctx, javaParser, pomXml, mavenWithMarkers, mavenProjectDirectory, markers);
-            JavaSourceSet testSourceSet = javaParser.getSourceSet(ctx);
+            List<J.CompilationUnit> testJavaSources = parseTestJavaSources(projectDirectory, resources,
+                                                                           executionContext, javaParser, pomXml, mavenWithMarkers, mavenProjectDirectory, markers);
+            JavaSourceSet testSourceSet = javaParser.getSourceSet(executionContext);
             sourceFiles.addAll(testJavaSources);
 
             // --------
@@ -161,7 +175,9 @@ public class MavenProjectParser {
             List<Resource> filteredResources = resourceParser.filter(projectDirectory, testResourcePaths, resources, relativeModuleDir);
             List<Marker> testResourceMarker = new ArrayList(javaProvenanceMarkers);
             testResourceMarker.add(testSourceSet);
-            testResourceMarker.add(gitProvenance);
+            if(gitProvenance != null) {
+                testResourceMarker.add(gitProvenance);
+            }
             List<SourceFile> testResources = resourceParser.parse(projectDirectory, filteredResources, testResourceMarker);
             sourceFiles.addAll(testResources);
         }
@@ -190,7 +206,8 @@ public class MavenProjectParser {
                 return content;
             });
         }).collect(Collectors.toList());
-        List<J.CompilationUnit> testCompilationUnits = javaParser.parseInputs(testJavaSourcesInput, projectDirectory, ctx);
+        List<J.CompilationUnit> testCompilationUnits = javaParser.parseInputs(testJavaSourcesInput, projectDirectory,
+                                                                              ctx);
         // FIXME: #7 JavaParser and adding markers is required when adding java sources and should go into dedicated component
         testCompilationUnits.forEach(cu -> cu.getMarkers().getMarkers().addAll(javaProvenanceMarkers));
         return testCompilationUnits;
@@ -216,32 +233,31 @@ public class MavenProjectParser {
         }).collect(Collectors.toList());
         List<J.CompilationUnit> mainCompilationUnits = javaParser.parseInputs(mainJavaSourcesInput, projectDirectory, ctx);
         // FIXME: #7 JavaParser and adding markers is required when adding java sources and should go into dedicated component
-        mainCompilationUnits.stream()
-                .forEach(cu -> cu.getMarkers().getMarkers().addAll(javaProvenanceMarkers));
+        mainCompilationUnits.stream().forEach(cu -> cu.getMarkers().getMarkers().addAll(javaProvenanceMarkers));
         return mainCompilationUnits;
     }
 
 
-
-
     public static List<Resource> filterMavenPoms(List<Resource> resources) {
-        return resources.stream()
-                .filter(p -> getPath(p).getFileName().toString().equals("pom.xml") &&
-                        !p.toString().contains("/src/"))
+        return resources
+                .stream()
+                .filter(p -> getPath(p).getFileName().toString().equals("pom.xml") && !p.toString().contains("/src/"))
                 .collect(Collectors.toList());
     }
 
     public List<Resource> getJavaSources(Path projectDir, List<Resource> resources, Xml.Document maven) {
 
         Path inPath = projectDir.resolve(maven.getSourcePath()).getParent().resolve(Paths.get("src", "main", "java"));
-        return resources.stream()
+        return resources
+                .stream()
                 .filter(r -> getPath(r).startsWith(inPath) && getPath(r).toString().endsWith(".java"))
                 .collect(Collectors.toList());
     }
 
     public List<Resource> getTestJavaSources(Path projectDir, List<Resource> resources, Xml.Document maven) {
         Path inPath = projectDir.resolve(maven.getSourcePath()).getParent().resolve(Paths.get("src", "test", "java"));
-        return resources.stream()
+        return resources
+                .stream()
                 .filter(r -> getPath(r).startsWith(inPath) && getPath(r).toString().endsWith(".java"))
                 .collect(Collectors.toList());
     }
@@ -259,7 +275,8 @@ public class MavenProjectParser {
         eventPublisher.publishEvent(new StartDownloadingDependenciesEvent(dependencies.size()));
 
 
-        List<Path> paths = dependencies.stream()
+        List<Path> paths = dependencies
+                .stream()
                 .filter(d -> d.getRepository() != null)
                 .peek(d -> eventPublisher.publishEvent(new StartDownloadingDependencyEvent(d.getRequested())))
 //                .parallel()
@@ -280,7 +297,10 @@ public class MavenProjectParser {
             MavenResolutionResult mavenResolution = MavenBuildFileUtil.findMavenResolution(maven).get();
             byDependedOn.computeIfAbsent(maven, m -> new HashSet<>());
 
-            Set<Dependency> dependencies = mavenResolution.getDependencies().values().stream()
+            Set<Dependency> dependencies = mavenResolution
+                    .getDependencies()
+                    .values()
+                    .stream()
                     .flatMap(d -> d.stream())
                     .map(d -> d.getRequested())
                     .collect(Collectors.toSet());
@@ -288,8 +308,10 @@ public class MavenProjectParser {
             for (Dependency dependency : dependencies) {
                 for (Xml.Document test : mavens) {
                     MavenResolutionResult testMavenResolution = MavenBuildFileUtil.findMavenResolution(test).get();
-                    if (testMavenResolution.getPom().getGroupId().equals(dependency.getGroupId()) &&
-                            testMavenResolution.getPom().getArtifactId().equals(dependency.getArtifactId())) {
+                    if (testMavenResolution.getPom().getGroupId().equals(dependency.getGroupId()) && testMavenResolution
+                            .getPom()
+                            .getArtifactId()
+                            .equals(dependency.getArtifactId())) {
                         byDependedOn.computeIfAbsent(maven, m -> new HashSet<>()).add(test);
                     }
                 }
@@ -311,7 +333,11 @@ public class MavenProjectParser {
                 }
             }
         }
-
+        sorted.sort((d, e) -> d.getSourcePath().toString().compareTo(e.getSourcePath().toString()));
+        if(log.isDebugEnabled()) {
+            String collect = sorted.stream().map(Xml.Document::getSourcePath).map(Object::toString).collect(Collectors.joining(", "));
+            log.debug("Sorted Maven files: \"%s\"".formatted(collect));
+        }
         return sorted;
     }
 

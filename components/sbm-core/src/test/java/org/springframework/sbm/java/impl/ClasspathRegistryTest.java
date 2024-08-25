@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.sbm.java.impl;
 
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Test;
+import org.openrewrite.ExecutionContext;
 import org.openrewrite.maven.tree.MavenResolutionResult;
 import org.openrewrite.maven.tree.ResolvedDependency;
 import org.openrewrite.maven.tree.Scope;
 import org.openrewrite.xml.tree.Xml;
 import org.springframework.sbm.build.impl.MavenSettingsInitializer;
 import org.springframework.sbm.build.impl.RewriteMavenParser;
+import org.springframework.sbm.openrewrite.RewriteExecutionContext;
 
 import java.util.List;
 import java.util.Set;
@@ -102,7 +103,9 @@ public class ClasspathRegistryTest {
         assertThat(sut.getCurrentDependencies()).isEmpty();
         assertThat(sut.getInitialDependencies()).isEmpty();
 
-        List<Xml.Document> poms = new RewriteMavenParser(new MavenSettingsInitializer()).parse(parentPom, pom1, pom2);
+        ExecutionContext executionContext = new RewriteExecutionContext();
+        List<Xml.Document> poms = new RewriteMavenParser(new MavenSettingsInitializer(),
+                                                         executionContext).parse(parentPom, pom1, pom2);
 
         Set<ResolvedDependency> resolvedDependencies = poms
                 .get(2)

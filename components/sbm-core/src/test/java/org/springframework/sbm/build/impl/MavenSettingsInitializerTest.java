@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,13 @@
  */
 package org.springframework.sbm.build.impl;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openrewrite.maven.MavenExecutionContextView;
 import org.openrewrite.maven.tree.MavenRepository;
 import org.springframework.sbm.openrewrite.RewriteExecutionContext;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -51,9 +51,7 @@ class MavenSettingsInitializerTest {
     }
 
     @Test
-    void mavenParserMustAdhereToSettingsXmlTest() throws URISyntaxException {
-
-
+    void mavenParserMustAdhereToSettingsXmlTest() {
         RewriteExecutionContext executionContext = new RewriteExecutionContext();
         MavenSettingsInitializer sut = new MavenSettingsInitializer();
         sut.initializeMavenSettings(executionContext);
@@ -65,26 +63,18 @@ class MavenSettingsInitializerTest {
 
         assertThat(mavenRepository.getId()).isEqualTo("central");
         assertThat(mavenRepository.getUri()).isEqualTo("https://jcenter.bintray.com");
-        assertThat(mavenRepository.isReleases()).isTrue();
-        assertThat(mavenRepository.isSnapshots()).isFalse();
+        assertThat(mavenRepository.getReleases()).isNull();
+        assertThat(mavenRepository.getSnapshots()).isEqualTo("false");
 
         MavenRepository localRepository = mavenExecutionContextView.getLocalRepository();
-        assertThat(localRepository.isSnapshots()).isTrue();
+        assertThat(localRepository.getSnapshots()).isNull();
 
-        String tmpDir = removeTrailingSlash(System.getProperty("java.io.tmpdir"));
-        String customLocalRepository = new URI("file://" + tmpDir).toString();
-        assertThat(removeTrailingSlash(localRepository.getUri())).isEqualTo(customLocalRepository);
-        assertThat(localRepository.isSnapshots()).isTrue();
+        String customLocalRepository = Path.of(System.getProperty("java.io.tmpdir")).toUri().toString();
+        assertThat(localRepository.getUri()).isEqualTo(customLocalRepository);
+        assertThat(localRepository.getSnapshots()).isNull();
         assertThat(localRepository.isKnownToExist()).isTrue();
         assertThat(localRepository.getUsername()).isNull();
         assertThat(localRepository.getPassword()).isNull();
-    }
-
-    String removeTrailingSlash(String string) {
-        if(string.endsWith("/")){
-            return string.substring(0, string.length()-1);
-        }
-        return string;
     }
 
     @AfterEach

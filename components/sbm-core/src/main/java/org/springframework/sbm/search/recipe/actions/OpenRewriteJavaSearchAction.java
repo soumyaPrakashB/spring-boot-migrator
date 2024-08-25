@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.springframework.sbm.search.recipe.actions;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.openrewrite.ExecutionContext;
 import org.openrewrite.java.JavaParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.sbm.engine.recipe.DisplayDescription;
@@ -44,6 +45,9 @@ public class OpenRewriteJavaSearchAction extends FrameworkSupportAction {
     @JsonIgnore
     @Autowired
     private JavaParser javaParser;
+    @JsonIgnore
+    @Autowired
+    private ExecutionContext executionContext;
 
 
     @Override
@@ -72,7 +76,8 @@ public class OpenRewriteJavaSearchAction extends FrameworkSupportAction {
 
 
     public void apply(ProjectContext context) {
-        OpenRewriteRecipeJavaSearch recipeJavaSearch = new OpenRewriteRecipeJavaSearch((compilationUnits -> rewriteRecipe.run(compilationUnits).getResults()), javaParser);
+        OpenRewriteRecipeJavaSearch recipeJavaSearch = new OpenRewriteRecipeJavaSearch((compilationUnits -> rewriteRecipe.run(compilationUnits).getResults()), javaParser,
+                                                                                       executionContext);
         recipeJavaSearch.commentFindings(context.getProjectJavaSources().list(), commentText);
     }
 

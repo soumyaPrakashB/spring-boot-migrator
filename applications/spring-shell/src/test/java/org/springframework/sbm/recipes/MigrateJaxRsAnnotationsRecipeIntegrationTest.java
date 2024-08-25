@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,15 +35,21 @@ public class MigrateJaxRsAnnotationsRecipeIntegrationTest extends IntegrationTes
     private final String expectedJavaSource =
             """
                     package com.example.jee.app;
-
+                    
+                    import org.springframework.http.HttpStatus;
+                    import org.springframework.http.HttpStatus.Series;
                     import org.springframework.http.MediaType;
                     import org.springframework.web.bind.annotation.*;
+                    
+                    import org.springframework.web.bind.annotation.PathVariable;
+                    import org.springframework.web.bind.annotation.RequestParam;
+                    
 
                     @RestController
-                    @RequestMapping(value = "/")
+                    @RequestMapping(value = "/", produces = "application/json")
                     public class PersonController {
 
-                        @RequestMapping(value = "/json/{name}", produces = "application/json", consumes = "application/json", method = RequestMethod.POST)
+                        @RequestMapping(value = "/json/{name}", consumes = "application/json", method = RequestMethod.POST)
                         public String getHelloWorldJSON(@PathVariable("name") String name) throws Exception {
                             System.out.println("name: " + name);
                             return "{\\"Hello\\":\\"" + name + "\\"";
@@ -59,6 +65,10 @@ public class MigrateJaxRsAnnotationsRecipeIntegrationTest extends IntegrationTes
                         public String getHelloWorldXML(@PathVariable("name") String name) throws Exception {
                             System.out.println("name: " + name);
                             return "<xml>Hello "+name+"</xml>";
+                        }
+                        
+                        private boolean isResponseStatusSuccessful(HttpStatus.Series family) {
+                            return family == Series.SUCCESSFUL;
                         }
 
                     }
@@ -129,11 +139,11 @@ public class MigrateJaxRsAnnotationsRecipeIntegrationTest extends IntegrationTes
         String javaFile = super.loadJavaFile("com.example.jee.app", "PersonController");
         assertThat(javaFile)
                 .as(TestDiff.of(javaFile, expectedJavaSource))
-                .isEqualTo(expectedJavaSource);
+                .isEqualToNormalizingNewlines(expectedJavaSource);
 
         String pomSource = super.loadFile(Path.of("pom.xml"));
         assertThat(pomSource)
                 .as(TestDiff.of(pomSource, expectedPomSource))
-                .isEqualTo(expectedPomSource);
+                .isEqualToNormalizingNewlines(expectedPomSource);
     }
 }

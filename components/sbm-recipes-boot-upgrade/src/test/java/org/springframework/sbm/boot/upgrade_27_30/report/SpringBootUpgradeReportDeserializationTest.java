@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.sbm.boot.upgrade_27_30.report.helper.BannerSupportHelper;
 import org.springframework.sbm.boot.upgrade_27_30.report.helper.ConditionOnlyHelper;
 import org.springframework.sbm.boot.upgrade_27_30.report.yaml.SpringBootUpgradeReportSectionHelperDeserializer;
-import org.springframework.sbm.boot.upgrade_27_30.report.helper.UpgradeDependenciesHelper;
+import org.springframework.sbm.boot.upgrade_27_30.report.helper.IsSpring27Or30ProjectHelper;
 import org.springframework.sbm.boot.upgrade_27_30.report.yaml.SpringBootUpgradeReportActionDeserializer;
 import org.springframework.sbm.boot.upgrade_27_30.report.yaml.SpringBootUpgradeReportYamlDeserializationConfiguration;
 import org.springframework.sbm.common.migration.conditions.TrueCondition;
@@ -87,7 +87,7 @@ public class SpringBootUpgradeReportDeserializationTest {
                       sections:
                                 
                         - title: Upgrade Dependencies
-                          helper: org.springframework.sbm.boot.upgrade_27_30.report.helper.UpgradeDependenciesHelper
+                          helper: org.springframework.sbm.boot.upgrade_27_30.report.helper.IsSpring27Or30ProjectHelper
                           change: |-
                             Spring Boot 3.0 upgraded many used dependencies.\s
                             Also, dependencies previously in the `javax` packages use the new `jakarta` packages now.
@@ -123,7 +123,7 @@ public class SpringBootUpgradeReportDeserializationTest {
         assertThat(action.getSections()).hasSize(1);
         SpringBootUpgradeReportSection section = (SpringBootUpgradeReportSection) action.getSections().get(0);
         assertThat(section.getTitle()).isEqualTo("Upgrade Dependencies");
-        assertThat(section.getHelper()).isInstanceOf(UpgradeDependenciesHelper.class);
+        assertThat(section.getHelper()).isInstanceOf(IsSpring27Or30ProjectHelper.class);
         assertThat(section.getChange()).isEqualTo("""
                                                   Spring Boot 3.0 upgraded many used dependencies.\s
                                                   Also, dependencies previously in the `javax` packages use the new `jakarta` packages now.

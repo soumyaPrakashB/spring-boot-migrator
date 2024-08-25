@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,24 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.sbm.engine.recipe;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
-import org.openrewrite.*;
 import org.openrewrite.Recipe;
+import org.openrewrite.Result;
+import org.openrewrite.SourceFile;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.sbm.common.filter.AbsolutePathResourceFinder;
 import org.springframework.sbm.engine.context.ProjectContext;
-import org.springframework.sbm.project.RewriteSourceFileWrapper;
-import org.springframework.sbm.project.resource.RewriteSourceFileHolder;
 
-import java.nio.file.Path;
-import java.util.*;
+import java.util.List;
 
 @Slf4j
-//@RequiredArgsConstructor
+@AllArgsConstructor
+@SuperBuilder
 public class OpenRewriteRecipeAdapterAction extends AbstractAction {
 
     private final Recipe recipe;
@@ -39,30 +38,23 @@ public class OpenRewriteRecipeAdapterAction extends AbstractAction {
     @Autowired
     private RewriteMigrationResultMerger resultMerger;
 
-//    private final ModifiableProjectResourceFactory modifiableProjectResourceFactory = new ModifiableProjectResourceFactory();
-
-
     @Override
     public boolean isApplicable(ProjectContext context) {
         return true;
         // FIXME: use getApplicableTest and getSingleSourceApplicableTest to calculate
-        /*
-        Method getApplicableTest = ReflectionUtils.findMethod(Recipe.class, "getApplicableTest");
+        /*Method getApplicableTest = ReflectionUtils.findMethod(Recipe.class, "getApplicableTest");
         ReflectionUtils.makeAccessible(getApplicableTest);
         try {
             TreeVisitor<?, ExecutionContext> visitor = (TreeVisitor<?, ExecutionContext>) getApplicableTest.invoke(recipe);
             if(visitor == null) {
                 return true;
             } else {
-                List<SourceFile> search = context.search(new OpenRewriteSourceFileFinder());
+                List<SourceFile> search = context.search(new OpenRewriteSourceFilesFinder());
                 return visitor.visit(search, new InMemoryExecutionContext());
             }
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
-        } catch (InvocationTargetException e) {
-            throw new RuntimeException(e);
-        }
-         */
+        }*/
     }
 
     public OpenRewriteRecipeAdapterAction(Recipe recipe) {

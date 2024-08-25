@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 package org.springframework.sbm.boot.upgrade_27_30.report.helper;
 
-import org.assertj.core.api.Assertions;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Test;
 import org.springframework.sbm.boot.upgrade_27_30.report.SpringBootUpgradeReportTestSupport;
@@ -58,9 +57,9 @@ public class SpringMVCAndWebFluxUrlMatchingChangesReportSectionTest {
                 .buildProjectContext()
                 .withSpringBootParentOf("2.7.5")
                 .withBuildFileHavingDependencies("org.springframework:spring-web:5.3.23")
-                .addJavaSource("src/main/java", restController1)
-                .addJavaSource("src/main/java", restController2)
-                .addJavaSource("src/main/java", anotherClass)
+                .withJavaSource("src/main/java", restController1)
+                .withJavaSource("src/main/java", restController2)
+                .withJavaSource("src/main/java", anotherClass)
                 .build();
 
         @Language("adoc")

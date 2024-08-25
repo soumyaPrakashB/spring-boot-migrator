@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 the original author or authors.
+ * Copyright 2021 - 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package org.springframework.sbm.common.util;
 
+import org.springframework.sbm.utils.LinuxWindowsPathUnifier;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 
@@ -32,8 +33,7 @@ import java.util.Map;
  */
 public class OsAgnosticPathMatcher implements PathMatcher {
 
-	private PathMatcher pathMatcher = new AntPathMatcher();
-	private LinuxWindowsPathUnifier pathUnifier = new LinuxWindowsPathUnifier();
+	private final PathMatcher pathMatcher = new AntPathMatcher();
 
 	@Override
 	public boolean isPattern(String s) {
@@ -42,42 +42,35 @@ public class OsAgnosticPathMatcher implements PathMatcher {
 
 	@Override
 	public boolean match(String pattern, String path) {
-		path = unifyPath(path);
-		return pathMatcher.match(pattern, path);
+		return pathMatcher.match(pattern, unifyPath(path));
 	}
 
 	private String unifyPath(String path) {
-		return pathUnifier.unifyPath(path);
+		return LinuxWindowsPathUnifier.transformToLinuxPath(path);
 	}
 
 	@Override
 	public boolean matchStart(String pattern, String path) {
-		path = unifyPath(path);
-		return pathMatcher.matchStart(pattern, path);
+		return pathMatcher.matchStart(pattern, unifyPath(path));
 	}
 
 	@Override
 	public String extractPathWithinPattern(String pattern, String path) {
-		path = unifyPath(path);
-		return pathMatcher.extractPathWithinPattern(pattern, path);
+		return pathMatcher.extractPathWithinPattern(pattern, unifyPath(path));
 	}
 
 	@Override
 	public Map<String, String> extractUriTemplateVariables(String pattern, String path) {
-		path = unifyPath(path);
-		return pathMatcher.extractUriTemplateVariables(pattern, path);
+		return pathMatcher.extractUriTemplateVariables(pattern, unifyPath(path));
 	}
 
 	@Override
 	public Comparator<String> getPatternComparator(String path) {
-		path = unifyPath(path);
-		return pathMatcher.getPatternComparator(path);
+		return pathMatcher.getPatternComparator(unifyPath(path));
 	}
 
 	@Override
 	public String combine(String pattern1, String pattern2) {
 		return pathMatcher.combine(pattern1, pattern2);
 	}
-
-
 }
